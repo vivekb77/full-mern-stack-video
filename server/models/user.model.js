@@ -1,15 +1,19 @@
 const mongoose = require('mongoose')
 
-const User = new mongoose.Schema(
+//schema validation for user data
+const UserData = new mongoose.Schema(
 	{
 		name: { type: String, required: true },
 		email: { type: String, required: true, unique: true },
 		password: { type: String, required: true },
-		quote: { type: String },
+		CreatedDate: { type: Date, required: true },
 	},
-	{ collection: 'user-data' }
+	{ collection: 'UserData' }
 )
 
-const model = mongoose.model('UserData', User)
+const model = mongoose.model('UserData', UserData)
 
 module.exports = model
+
+
+
