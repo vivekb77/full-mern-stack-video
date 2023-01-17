@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Tweets from './pages/Tweets'
 import AI from './pages/AI'
+import Download from './pages/Download'
 
 const App = () => {
 	return (
@@ -15,6 +16,7 @@ const App = () => {
 				{/* <Route path="/dashboard" exact component={Dashboard} /> */}
 				<Route path="/tweets" exact component={Tweets} />
 				<Route path="/ai" exact component={AI} />
+				<Route path="/download" exact component={Download} />
 			</BrowserRouter>
 		</div>
 	)

@@ -199,7 +199,10 @@ const getPage = async (params, options, nextToken,url) => {
 
 let tweeterUserIdToAnalyse;
 let userTweetsArrayforAI = [];
-let AIanalysisArray;
+let AIanalysisArray= [];
+let TotalTokensUsed =0 ;
+let PromptTokensUsed = 0;
+let CompletionTokensUsed = 0;
 
 app.post('/api/ai', async (req, res) => {
 	const token = req.headers['x-access-token']
@@ -219,23 +222,53 @@ app.post('/api/ai', async (req, res) => {
 		}
 
 		//open ai call
-		let prompt = userTweetsArrayforAI.toString().slice(600, 900) + "\n\nTl;dr";
+		console.log("totals runs will be  -- "+userTweetsArrayforAI.toString().length/5000)
+
+	let slicedata = 0;
+
+	// for (let i = 0; i < userTweetsArrayforAI.toString().length/5000; i++)
+	for (let i = 0; i < 4; i++)
+	{
+		console.log("run is "+i)
+		// console.log("slicedata is "+slicedata)
+
+		let prompttext = userTweetsArrayforAI.toString().slice(slicedata, slicedata+4900);
+		// let prompt: `What are the key points from this text:\n\n\"\"\"\n${prompttext}\n\"\"\"\n\nThe key points are:`,
 		// console.log("prompt is "+prompt)
 
+		finalprompt = `Read these tweets then answer the following questions:\n\n\"\"\"\n${prompttext}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Pull all hashtags in these tweets.\n4. Sentiment of tweets.\n\nAnswers:\n1.`;
+
 		const { Configuration, OpenAIApi } = require("openai");
+		
 		const configuration = new Configuration({
-		apiKey: "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",
+		apiKey: "",
 		});
 
+	
 		const openai = new OpenAIApi(configuration);
+
 		const response = await openai.createCompletion({
-		model: "text-davinci-003",
-		prompt: prompt,
-		temperature: 0.9,
-		max_tokens: 1000,
+			"model": "text-curie-001",
+			"prompt": finalprompt,
+			"temperature": 0.9,
+			"max_tokens": 300,
+			"top_p": 1,
+			"frequency_penalty": 0.37,
+			"presence_penalty": 0,
+			"stop": ["\n\n"]
 		});
-	 
-		AIanalysisArray = response.data.choices[0].text.trim()
+
+		AIanalysisArray.push(response.data.choices[0].text.trim())
+
+		TotalTokensUsed = TotalTokensUsed + response.data.usage.total_tokens;
+		PromptTokensUsed = PromptTokensUsed + response.data.usage.prompt_tokens;
+		CompletionTokensUsed = CompletionTokensUsed + response.data.usage.completion_tokens;
+		// console.log("comp tokens "+CompletionTokensUsed)
+		slicedata = slicedata+4900;
+		
+
+
+	}
 	
 		//update DB with AI analysis
 		await TweetData.updateOne(
@@ -244,19 +277,19 @@ app.post('/api/ai', async (req, res) => {
 		)
 		await TweetData.updateOne(
 			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { TotalTokensUsed: response.data.usage.total_tokens } }
+			{ $set: { TotalTokensUsed: TotalTokensUsed.toString()} }
 		)
 		await TweetData.updateOne(
 			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { PromptTokensUsed: response.data.usage.prompt_tokens } }
+			{ $set: { PromptTokensUsed: PromptTokensUsed.toString() } }
 		)
 		await TweetData.updateOne(
 			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { CompletionTokensUsed: response.data.usage.completion_tokens } }
+			{ $set: { CompletionTokensUsed: CompletionTokensUsed.toString() } }
 		)
 
 
-		return res.json({ status: 'ok', AItweets: AIanalysisArray  })
+		return res.json({ status: 'ok', AItweets: AIanalysisArray })
 
 	} catch (error) {
 		console.log(error)
@@ -264,4 +297,32 @@ app.post('/api/ai', async (req, res) => {
 	}
 })
 
+
+
+app.post('/api/download', async (req, res) => {
+	const token = req.headers['x-access-token']
+
+	dataToDownload = [];
+	
+	tweeterUserIdToDownlaod = req.body.tweeterUserIdToAnalyse;
+
+	try {
+
+		//get tweets from DB for the user
+		const TwiterUserData =  await TweetData.findOne({
+			TwitteruserName: tweeterUserIdToDownlaod,
+		})
+
+		for (i=0;i<TwiterUserData.AIAnalysis.length;i++){ 
+			dataToDownload.push(TwiterUserData.AIAnalysis[i]);
+
+		}
+
+		return res.json({ status: 'ok', AItweets: dataToDownload })
+
+	} catch (error) {
+		console.log(error)
+		res.json({ status: 'error', error: 'Something went wrong' })
+	}
+})
 

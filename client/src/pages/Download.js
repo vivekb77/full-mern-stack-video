@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import jwt from 'jsonwebtoken'
 // import { useHistory } from 'react-router-dom'
 
-const AI = () => {
+const Download = () => {
 	// const history = useHistory()
 	const [AItweets, setAITweets] = useState([])
 	const [twitterUserID, settwitterUserID] = useState('')
@@ -39,7 +39,7 @@ const AI = () => {
 	async function AI(event) {
 		event.preventDefault()
 
-		const req = await fetch('http://localhost:1337/api/ai', {
+		const req = await fetch('http://localhost:1337/api/download', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -83,10 +83,10 @@ const AI = () => {
                    // value={settwitterUserID}
 					onChange={(e) => settwitterUserID(e.target.value)}
 				/>
-				<input type="submit" value="Get analysis" />
+				<input type="submit" value="Get Data to download" />
 
 			</form>
-            <h1>Analysis: </h1>
+            <h1>Data to Download: </h1>
 
            {AItweets.map((AItweet,index) => {
 			
@@ -100,4 +100,4 @@ const AI = () => {
 	)
 }
 
-export default AI
+export default Download
