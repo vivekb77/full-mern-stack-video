@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard'
 import Tweets from './pages/Tweets'
 import AI from './pages/AI'
 import Download from './pages/Download'
+import DownloadTweets from './pages/DownloadTweets'
 
 const App = () => {
 	return (
@@ -17,6 +18,7 @@ const App = () => {
 				<Route path="/tweets" exact component={Tweets} />
 				<Route path="/ai" exact component={AI} />
 				<Route path="/download" exact component={Download} />
+				<Route path="/downloadtweets" exact component={DownloadTweets} />
 			</BrowserRouter>
 		</div>
 	)

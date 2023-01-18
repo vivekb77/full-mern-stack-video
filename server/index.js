@@ -5,6 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const UserData = require('./models/user.model')
 const TweetData = require('./models/tweet.model')
+const AllTweetData = require('./models/alltweet.model')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
@@ -112,6 +113,7 @@ app.post('/api/tweets', async (req, res) => {
 
 
 const needle = require('needle');
+const { response } = require('express')
 
 
 const bearerToken = "AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2";
@@ -241,7 +243,7 @@ app.post('/api/ai', async (req, res) => {
 		const { Configuration, OpenAIApi } = require("openai");
 		
 		const configuration = new Configuration({
-		apiKey: "",
+		apiKey: "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",
 		});
 
 	
@@ -251,7 +253,7 @@ app.post('/api/ai', async (req, res) => {
 			"model": "text-curie-001",
 			"prompt": finalprompt,
 			"temperature": 0.9,
-			"max_tokens": 300,
+			"max_tokens": 200,
 			"top_p": 1,
 			"frequency_penalty": 0.37,
 			"presence_penalty": 0,
@@ -292,7 +294,7 @@ app.post('/api/ai', async (req, res) => {
 		return res.json({ status: 'ok', AItweets: AIanalysisArray })
 
 	} catch (error) {
-		console.log(error)
+		console.log(JSON.stringify(error))
 		res.json({ status: 'error', error: 'Something went wrong' })
 	}
 })
@@ -325,4 +327,142 @@ app.post('/api/download', async (req, res) => {
 		res.json({ status: 'error', error: 'Something went wrong' })
 	}
 })
+
+
+app.post('/api/downloadtweets1111', async (req, res) => {
+	const token = req.headers['x-access-token']
+
+	dataToDownload = [];
+	
+	tweeterUserIdToDownlaod = req.body.tweeterUserIdToAnalyse;
+
+	try {
+
+		//get tweets from DB for the user
+		const TwiterUserData =  await TweetData.findOne({
+			TwitteruserName: tweeterUserIdToDownlaod,
+		})
+
+		for (i=0;i<TwiterUserData.Tweets.length;i++){ 
+			dataToDownload.push(TwiterUserData.Tweets[i]);
+
+		}
+
+
+		return res.json({ status: 'ok', Usertweets: dataToDownload })
+
+	} catch (error) {
+		console.log(error)
+		res.json({ status: 'error', error: 'Something went wrong' })
+	}
+})
+
+
+
+
+
+
+// this is 
+
+// a 
+
+// new 
+
+// use case
+//https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
+// https://developer.twitter.com/en/docs/twitter-api/enterprise/rules-and-filtering/operators-by-product
+
+
+app.post('/api/downloadtweets', async (req, res) => {
+	
+	
+	const token = 'AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2';
+
+	const endpointUrl = "https://api.twitter.com/2/tweets/search/recent";
+	
+	try {
+		
+	async function getRequest() {
+	
+		//“Twitter API”, in "" will do exact search 
+		// -wordhere will not include word in the search
+		// has:media has:images has:links has:videos
+		// place:"new york city" OR place:seattle
+		// place_country:US OR place_country:MX OR place_country:CA
+		// from:twitteruser -has:hashtags
+		//followers_count:500 tweets_count:1000  following_count:500
+	
+		
+		const params = {
+			'query': ' "openai" -is:retweet -is:quote is:reply lang:en ',
+			'max_results': 100,
+			'start_time': '2023-01-11T00:00:00Z',
+			'end_time': '2023-01-15T00:00:00Z',
+			'tweet.fields':('author_id','created_at','id', 'lang', 'public_metrics' )
+			
+		}
+	
+		const res = await needle('get', endpointUrl, params, {
+			headers: {
+				"User-Agent": "v2RecentSearchJS",
+				"authorization": `Bearer ${token}`
+			}
+		})
+	
+		if (res.body) {
+			return res.body;
+			
+		} else {
+			throw new Error('Unsuccessful request');
+		}
+	}
+	
+
+
+	(async () => {
+	
+		try {
+			// Make request
+			const response111 = await getRequest();
+
+				for (i=0;i<response111.data.length;i++){ 
+					// if(response111.data[i].public_metrics.impression_count>1000)
+					// {
+				
+						await AllTweetData.create({
+								TweetText: response111.data[i].text,
+								TweetId: response111.data[i].id,
+								retweet_count: response111.data[i].public_metrics.retweet_count,
+								reply_count:response111.data[i].public_metrics.reply_count,
+								like_count:response111.data[i].public_metrics.like_count,
+								quote_count:response111.data[i].public_metrics.quote_count,
+								impression_count:response111.data[i].public_metrics.impression_count,
+							
+						})
+					// }
+				}
+				console.log("tweets with likes and all added to DB")
+
+		} catch (e) {
+			console.log("error is "+e);
+			process.exit(-1);
+		}
+		
+		process.exit();
+		
+	})();
+	
+	}
+	
+	catch (err) {
+			res.json({ status: 'error', error: 'error occured line 398' })
+			console.log("error is  ---" +err)
+		}
+	
+})
+
+
+
+
+
 
