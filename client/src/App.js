@@ -10,12 +10,13 @@ import DownloadTweets from './pages/DownloadTweets'
 
 const App = () => {
 	return (
-		<div>
+		<div className='maindiv'>
 			<BrowserRouter>
 				<Route path="/login" exact component={Login} />
 				<Route path="/register" exact component={Register} />
 				{/* <Route path="/dashboard" exact component={Dashboard} /> */}
 				<Route path="/tweets" exact component={Tweets} />
+				<Route path="/" exact component={Tweets} />
 				<Route path="/ai" exact component={AI} />
 				<Route path="/download" exact component={Download} />
 				<Route path="/downloadtweets" exact component={DownloadTweets} />

@@ -34,31 +34,32 @@ function App() {
 	}
 
 	return (
-		<div>
-			<h1>Register</h1>
-			<form onSubmit={registerUser}>
-				<input
+		<div className='registerdiv'>
+			<h1>TweetEra Register</h1>
+			<form className='registerform' onSubmit={registerUser}>
+				<input className='registerinput'
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					type="text"
 					placeholder="Name"
 				/>
 				<br />
-				<input
+				<input className='registerinput'
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					type="email"
 					placeholder="Email"
 				/>
 				<br />
-				<input
+				<input className='registerinput'
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					type="password"
 					placeholder="Password"
 				/>
 				<br />
-				<input type="submit" value="Register" />
+				<input className='registerbutton' type="submit" value="Register" />
+				<a rel="noopener noreferrer" href="login">Already a User! Login</a>
 			</form>
 		</div>
 	)

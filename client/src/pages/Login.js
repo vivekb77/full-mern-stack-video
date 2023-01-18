@@ -22,7 +22,7 @@ function App() {
 
 		if (data.user) {
 			localStorage.setItem('token', data.user)
-			alert('Login successful')
+			// alert('Login successful')
 			window.location.href = '/tweets'
 		} else {
 			alert('Please check your username and password')
@@ -30,10 +30,11 @@ function App() {
 	}
 
 	return (
-		<div>
-			<h1>Login</h1>
-			<form onSubmit={loginUser}>
-				<input
+		<div className='logindiv'>
+			<h1>TweetEra Login</h1>
+			<form onSubmit={loginUser} className="formlogin">
+				<input 
+				className='emaillogin'
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					type="email"
@@ -41,13 +42,15 @@ function App() {
 				/>
 				<br />
 				<input
+				className='emaillogin'
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					type="password"
 					placeholder="Password"
 				/>
 				<br />
-				<input type="submit" value="Login" />
+				<input className='buttonlogin' type="submit" value="Login" />
+				<a rel="noopener noreferrer" href="register">New here! Register</a>
 			</form>
 		</div>
 	)

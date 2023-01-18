@@ -46,7 +46,7 @@ const DownloadTweets = () => {
 				'x-access-token': localStorage.getItem('token'),
 			},
 			body: JSON.stringify({
-				tweeterUserIdToAnalyse: twitterUserID,
+				tweeterUserhandleToAnalyse: twitterUserID,
 			}),
 		})
 

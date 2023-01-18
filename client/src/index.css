@@ -11,3 +11,263 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.maindiv{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.card{
+  width: 90%;
+  height: 100%;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+  box-shadow: 0 0 10px #ccc;
+}
+
+.card-text{
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.card-body{
+  /* display: flex; */
+  /* flex-direction: column; */
+  align-items: left;
+  margin: 3%;
+}
+
+.card-title{
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.userIdTextBox{
+  text-indent:20px;
+  width: 95%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+  margin-top: 5px;
+}
+
+/* 
+.useIdButton{
+  width: 100%;
+  height: 50px;
+  border: 1px solid rgb(113, 13, 13);
+  border-radius: 5px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(40, 160, 220);
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+  font-size: 20px;
+  font-weight: 900;
+
+}
+
+.useIdButton:hover{
+  background-color: rgb(224, 70, 18);
+  color: var(--bg);
+  text-decoration: none;
+
+} */
+
+/* .useIdButton:disabled{
+  background-color: rgb(5, 1, 0);
+  color: var(--bg);
+  text-decoration: none;
+  color: aliceblue;
+
+} */
+
+/* .useIdButton {
+  width: 100%;
+  margin-top: 20px;
+  display: inline-block;
+  text-align: center;
+  background: var(--color);
+  background-color: rgb(231, 66, 29);
+  color: var(--bg);
+  font-weight: bold;
+  padding: 1.18em 1.32em 1.03em;
+  line-height: 1;
+  border-radius: 1em;
+  position: relative;
+  min-width: 8.23em;
+  text-decoration: none;
+  font-family: var(--font);
+  font-size: 1.25rem;
+}
+.useIdButton:hover{
+  background-color: rgb(224, 70, 18);
+  color: var(--bg);
+  text-decoration: none;
+
+} */
+
+
+.tweetdiv{
+  width: 90%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px;
+  box-shadow: 0 0 10px #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logindiv{
+
+  width: 50%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 50px;
+  margin: 100px;
+  box-shadow: 0 0 10px #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emaillogin{
+  width: 100%;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+  margin-top: 5px;
+}
+
+.buttonlogin {
+  width: 100%;
+  height: 40px;
+  border: 1px solid rgb(113, 13, 13);
+  border-radius: 5px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(40, 160, 220);
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+}
+
+.formlogin{
+  width: 40%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.registerdiv{
+  width: 50%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 50px;
+  margin: 100px;
+  box-shadow: 0 0 10px #ccc;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.registerform{
+  width: 40%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.registerinput{
+  width: 100%;
+  height: 30px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+  margin-top: 5px;
+}
+
+.registerbutton{
+  width: 100%;
+  height: 40px;
+  border: 1px solid rgb(113, 13, 13);
+  border-radius: 5px;
+  color: rgb(255, 255, 255);
+  background-color: rgb(40, 160, 220);
+  padding: 5px;
+  margin: 5px;
+  align-self: center;
+  font-size: 13px;
+
+}
+
+
+.button {
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-size: 20px;
+  letter-spacing: 4px;
+  position: relative;
+  background-color: #009dff;
+  border: none;
+  color: #fff;
+  padding: 20px;
+  width: 100%;
+  margin-top: 10px;
+  text-align: center;
+  transition-duration: 0.4s;
+  overflow: hidden;
+  box-shadow: 0 5px 15px #193047;
+  border-radius: 4px;
+  
+}
+
+.button:hover {
+  background: #fff;
+  box-shadow: 0px 2px 10px 5px #1abc9c;
+  color: #000;
+}
+
+.button:after {
+  content: "";
+  background: #1abc9c;
+  display: block;
+  position: absolute;
+  padding-top: 300%;
+  padding-left: 350%;
+  margin-left: -20px !important;
+  margin-top: -120%;
+  opacity: 0;
+  transition: all 0.8s
+}
+
+.button:active:after {
+  padding: 0;
+  margin: 0;
+  opacity: 1;
+  transition: 0s
+}
+
+.button:focus { outline:0; }

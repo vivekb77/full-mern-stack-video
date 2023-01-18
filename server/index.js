@@ -80,6 +80,15 @@ app.listen(1337, () => {
 
 
 
+
+
+
+
+
+
+
+
+
 app.post('/api/tweets', async (req, res) => {
 	const token = req.headers['x-access-token']
 
@@ -95,14 +104,15 @@ app.post('/api/tweets', async (req, res) => {
 		await TweetData.create({
 			Email: email ,
 			TweeterUserIDtopullTweets: tweeterUserIdToPullTweets,
-			Tweets: userTweetsArray,
+			AllAboutTweetsArray: AllAboutTweetsArray,
 			TwitteruserName:TwitteruserName,
 			CreatedDate : new Date()
 		}
 		
 		)
-		console.log("added tweet data")
-		return res.json({ status: 'ok', tweets: userTweetsArray  })
+		console.log("added all tweet data after analysis")
+		
+		return res.json({ status: 'ok', tweets: AllAboutTweetsArray  })
 
 	} catch (error) {
 		console.log(error)
@@ -119,7 +129,8 @@ const { response } = require('express')
 const bearerToken = "AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2";
 
 let TwitteruserName
-let userTweetsArray = [];
+let AllAboutTweetsArray = [];
+
 
 const getUserTweets = async (tweeterUserIdToPullTweets) => {
 
@@ -132,9 +143,12 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 	
 
     let params = {
-        "max_results": 10,
-        "tweet.fields": "created_at",
-        "expansions": "author_id"
+
+
+		'max_results': 30, //hasNextPage = false;  so that only max 95 tweets are pulled on first page 
+        "expansions": "author_id",
+		'tweet.fields':('author_id','created_at','id', 'lang', 'public_metrics' ),
+
     }
 
     const options = {
@@ -147,14 +161,16 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
     let hasNextPage = true;
     let nextToken = null;
     let userName;
-    console.log("Retrieving Tweets...");
+    // console.log("Retrieving Tweets...");
 
     while (hasNextPage) {
+		console.log("Retrieving Tweets...");
         let resp = await getPage(params, options, nextToken,url);
         if (resp && resp.meta && resp.meta.result_count && resp.meta.result_count > 0) {
             userName = resp.includes.users[0].username;
             if (resp.data) {
                 userTweets.push.apply(userTweets, resp.data);
+				hasNextPage = false; // so that only 200 tweets are pulled on first page 
             }
             if (resp.meta.next_token) {
                 nextToken = resp.meta.next_token;
@@ -168,12 +184,109 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 
 
     console.log(`Got ${userTweets.length} Tweets from ${userName} (user ID ${userId})!`);
-	// console.log(userTweets[0].text);
-	TwitteruserName = userName
-	for (i=0;i<userTweets.length;i++){ 
-		userTweetsArray.push(userTweets[i].text);
 
-	  }
+	
+	TwitteruserName = userName
+	const { Configuration, OpenAIApi } = require("openai");
+		
+	const configuration = new Configuration({
+	apiKey: "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",
+	});
+	const openai = new OpenAIApi(configuration);
+
+
+	for (i=0;i<userTweets.length;i++){ 
+
+		let likesTOviewsRatio = ((userTweets[i].public_metrics.like_count/userTweets[i].public_metrics.impression_count)*100).toFixed(3);
+
+		//filter out quote , retweets and replies
+		let tweetType 
+		if (userTweets[i].text.startsWith("RT @")){
+			tweetType = "retweet"
+		}
+		else if (userTweets[i].text.startsWith("@")){
+			tweetType = "reply"
+		}
+		// else if (userTweets[i].text.startsWith("“")){
+		// 	tweetType = "quote" //does not work as quote tweets are not in the same format
+		// }
+		else {
+
+			tweetType = "tweet"
+		}
+		
+		let prompt;
+		if (tweetType == "tweet"){
+
+			if(likesTOviewsRatio >= 2){
+				myanalysis = "Engagement is above average, here are some reasons and a similar tweet you can post for high engagement rate.  ";
+				prompt = userTweets[i].text + "Engagement is above average, Brainstorm the reasons why this tweet was so popular? Generate a similar tweet to post for high engagement rate.";
+			}
+			else if(likesTOviewsRatio >= 1){
+				myanalysis = "Engagement is average, here are some reasons and a better tweet you can post for high engagement rate.";
+				prompt = userTweets[i].text +"Engagement is average, Brainstorm the reasons why this tweet was not so popular? Generate a better tweet to post for high engagement rate.";
+			}
+			else if(likesTOviewsRatio < 1){
+				myanalysis = "Engagement is below average, here are some reasons and a better tweet you can post for high engagement rate.  ";
+				prompt = userTweets[i].text + "Engagement is below average, Brainstorm the reasons why this tweet performed poor? Generate a different tweet to post for high engagement rate.";
+			}
+			else{
+				myanalysis =  "Engagement is below average, here are some reasons and a better tweet you can post for high engagement rate.  ";
+				prompt = userTweets[i].text + "Engagement is below average, Brainstorm the reasons why this tweet performed poor? Generate a different tweet to post for high engagement rate.";
+			}
+			
+		}
+		// if (tweetType == "retweet"){
+		// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
+		// 	 myanalysis = "it is retweet";
+		// }
+		// if (tweetType == "reply"){
+		// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
+		// 	 myanalysis = " it is a reply";
+		// }
+		
+				//call AI
+		if (tweetType == "tweet"){
+
+				console.log("run is "+ i);
+
+				const response = await openai.createCompletion({
+					"model": "text-curie-001",
+					// "model": "text-davinci-003",
+					"prompt": prompt,
+					"temperature": 0.9,
+					"max_tokens": 200,
+					// "top_p": 1,
+					"frequency_penalty": 0.37,
+					"presence_penalty": 0,
+					// "stop": ["\n\n"]
+				});
+
+				let tweetSentiment = (myanalysis + ". "+response.data.choices[0].text.trim())
+
+
+				// add all data to array
+
+				let allTweetDataobj = {
+					tweet: userTweets[i].text,
+					tweetType: tweetType,
+					tweetID: `https://twitter.com/${userName}/status/${userTweets[i].id}`,
+					retweet_count:userTweets[i].public_metrics.retweet_count,
+					reply_count:userTweets[i].public_metrics.reply_count,
+					like_count: userTweets[i].public_metrics.like_count,
+					quote_count: userTweets[i].public_metrics.quote_count,
+					impression_count : userTweets[i].public_metrics.impression_count,
+					tweetSentiment:tweetSentiment,
+					likesTOviewsRatio:likesTOviewsRatio
+				};
+
+				AllAboutTweetsArray.push(allTweetDataobj);
+				
+		}
+	}
+
+	AllAboutTweetsArray.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
+
 }
 
 
@@ -191,9 +304,40 @@ const getPage = async (params, options, nextToken,url) => {
         }
         return resp.body;
     } catch (err) {
+		console.log("error is -----------" +JSON.stringify(err))
         throw new Error(`Request failed: ${err}`);
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // AI
@@ -375,6 +519,8 @@ app.post('/api/downloadtweets1111', async (req, res) => {
 
 app.post('/api/downloadtweets', async (req, res) => {
 	
+	let tweeterUserIdToAnalyse = req.body.tweeterUserIdToAnalyse;
+	console.log(tweeterUserIdToAnalyse);
 	
 	const token = 'AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2';
 
@@ -394,10 +540,11 @@ app.post('/api/downloadtweets', async (req, res) => {
 	
 		
 		const params = {
-			'query': ' "openai" -is:retweet -is:quote is:reply lang:en ',
-			'max_results': 100,
-			'start_time': '2023-01-11T00:00:00Z',
-			'end_time': '2023-01-15T00:00:00Z',
+			// 'query': ' "openai" -is:retweet -is:quote is:reply lang:en ',
+			'query': 'from:TestEraAI -is:retweet -is:quote is:reply lang:en ',
+			'max_results': 0,
+			// 'start_time': '2023-01-11T00:00:00Z',
+			// 'end_time': '2023-01-15T00:00:00Z',
 			'tweet.fields':('author_id','created_at','id', 'lang', 'public_metrics' )
 			
 		}
@@ -424,6 +571,7 @@ app.post('/api/downloadtweets', async (req, res) => {
 		try {
 			// Make request
 			const response111 = await getRequest();
+			console.log("dfsdsfds-----"+JSON.stringify(response111));
 
 				for (i=0;i<response111.data.length;i++){ 
 					// if(response111.data[i].public_metrics.impression_count>1000)
