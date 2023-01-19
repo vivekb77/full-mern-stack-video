@@ -31,13 +31,17 @@ function App() {
 		if (data.status === 'ok') {
 			history.push('/login') // if response is ok then redirect to login page
 		}
+		else {
+			alert('You are already registered! Login now')
+		}
 	}
 
 	return (
 		<div className='registerdiv'>
-			<h1>TweetEra Register</h1>
+			<h1>GalaxzAI Register</h1>
 			<form className='registerform' onSubmit={registerUser}>
 				<input className='registerinput'
+				required
 					value={name}
 					onChange={(e) => setName(e.target.value)}
 					type="text"
@@ -45,6 +49,7 @@ function App() {
 				/>
 				<br />
 				<input className='registerinput'
+				required
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
 					type="email"
@@ -52,14 +57,16 @@ function App() {
 				/>
 				<br />
 				<input className='registerinput'
+				required
 					value={password}
 					onChange={(e) => setPassword(e.target.value)}
 					type="password"
 					placeholder="Password"
 				/>
 				<br />
-				<input className='registerbutton' type="submit" value="Register" />
-				<a rel="noopener noreferrer" href="login">Already a User! Login</a>
+				<input className='button' type="submit" value="Register" />
+				<br/>
+				<a rel="noopener noreferrer" href="login">Already User! Login</a>
 			</form>
 		</div>
 	)

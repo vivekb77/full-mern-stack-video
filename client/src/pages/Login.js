@@ -27,11 +27,14 @@ function App() {
 		} else {
 			alert('Please check your username and password')
 		}
+		
+		
+	
 	}
 
 	return (
 		<div className='logindiv'>
-			<h1>TweetEra Login</h1>
+			<h1>GalaxzAI Login</h1>
 			<form onSubmit={loginUser} className="formlogin">
 				<input 
 				className='emaillogin'
@@ -39,6 +42,7 @@ function App() {
 					onChange={(e) => setEmail(e.target.value)}
 					type="email"
 					placeholder="Email"
+					required
 				/>
 				<br />
 				<input
@@ -47,9 +51,11 @@ function App() {
 					onChange={(e) => setPassword(e.target.value)}
 					type="password"
 					placeholder="Password"
+					required
 				/>
 				<br />
-				<input className='buttonlogin' type="submit" value="Login" />
+				<input className='button' type="submit" value="Login" />
+				<br/>
 				<a rel="noopener noreferrer" href="register">New here! Register</a>
 			</form>
 		</div>

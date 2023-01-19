@@ -5,7 +5,6 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const UserData = require('./models/user.model')
 const TweetData = require('./models/tweet.model')
-// const AllTweetData = require('./models/alltweet.model')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
@@ -14,12 +13,13 @@ const bcrypt = require('bcryptjs')
 app.use(cors())
 app.use(express.json())
 
+// prod
 // mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/?retryWrites=true&w=majority')
 
+// dev
 mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test')
 
 
-//frontend react server is sending request to backend node server
 app.post('/api/register', async (req, res) => {
 	console.log(req.body)
 	
@@ -35,21 +35,23 @@ app.post('/api/register', async (req, res) => {
 
 		res.json({ status: 'ok' })
 	} catch (err) {
+		console.log("err"+err)
 		res.json({ status: 'error', error: 'Duplicate email' })
 		console.log("error is  ---" +err)
 	}
 })
 
-
-
-
 app.post('/api/login', async (req, res) => {
+
+
 	const user = await UserData.findOne({
 		email: req.body.email,
 	})
 
 	if (!user) {
+		console.log('no user')
 		return { status: 'error', error: 'Invalid Email' }
+	
 	}
 
 	const isPasswordValid = await bcrypt.compare(
@@ -72,18 +74,35 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
-
-
 app.listen(1337, () => {
 	console.log('Server started on 1337')
 })
 
 
+// EXAMPLES START
+
+app.post('/api/examples', async (req, res) => {
+
+	pullexamplesforusers  = ["SahilBloom","GrammarHippy","elonmusk"]
+
+	let rand = Math.floor(Math.random() * pullexamplesforusers.length);
+
+	try {
+		
+		const AllAboutTweetsArray = await TweetData.findOne({
+			Email: 'v@v.v' ,
+			TwitteruserName: pullexamplesforusers[rand]
+		})
+			return res.json({ status: 'ok', tweets: AllAboutTweetsArray  })
+
+	} catch (error) {
+		console.log(error)
+		res.json({ status: 'error', error: 'Something went wrong while retrieving tweets' })
+	}
+})
 
 
-
-
-
+// EXAMPLES END
 
 
 
@@ -107,7 +126,7 @@ app.post('/api/tweets', async (req, res) => {
 			return res.json({ status: 'error', error: 'Twitter user not found' })
 		}
 		if(tweeterUserIdToPullTweets != null){
-			await getUserTweets(tweeterUserIdToPullTweets);
+			await getUserTweets(tweeterUserIdToPullTweets); // pulls the tweets from twitter
 		}
 		
 	} catch (error) {
@@ -118,7 +137,7 @@ app.post('/api/tweets', async (req, res) => {
 	try {
 		
 
-		console.log("started analysis of tweets by AI")
+		console.log("started analysis of Tweets by AI")
 
 		const decoded = jwt.verify(token, 'secret123')
 		const email = decoded.email
@@ -133,7 +152,7 @@ app.post('/api/tweets', async (req, res) => {
 			}
 			
 			)
-			console.log("added all tweet data after analysis")
+			console.log("Added all Tweet data to DB and sent response to UI after analysis")
 			
 			return res.json({ status: 'ok', tweets: AllAboutTweetsArray  })
 		}
@@ -154,7 +173,7 @@ const needle = require('needle');
 const { response } = require('express')
 
 
-const bearerToken = "AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2";
+const bearerToken = process.env.bearerToken
 
 let TwitteruserName
 let AllAboutTweetsArray = [];
@@ -219,14 +238,17 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 	const { Configuration, OpenAIApi } = require("openai");
 		
 	const configuration = new Configuration({
-	apiKey: "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",
+
+
+	apiKey : process.env.apiKey,
+
+
 	});
 	const openai = new OpenAIApi(configuration);
 
 		try {
 			//clear the array first 
 			AllAboutTweetsArray = []
-			// console.log("length of tweets analysed is  "+AllAboutTweetsArray.length)
 
 			for (i=0;i<userTweets.length;i++){ 
 
@@ -299,15 +321,15 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 						});
 
 						let tweetSentiment = (myanalysis + ". "+analysetweet.data.choices[0].text.trim())
-						let promptfornewtweet = "This is a tweet " + userTweets[i].text + ". " + "And this is analysis on the tweet. " +analysetweet.data.choices[0].text.trim() + " Now write a new tweet based on the analysis. \n\n"
+						let promptfornewtweet = "This is a tweet " + userTweets[i].text + ". " +analysetweet.data.choices[0].text.trim() + " Now write a new tweet based on the analysis. \n\n"
 
-				//new tweet
+				//generate a new tweet
 						const newtweet = await openai.createCompletion({
 							"model": "text-curie-001",
 							// "model": "text-davinci-003",
 							"prompt": promptfornewtweet,
 							"temperature": 0.9,
-							"max_tokens": 400,
+							"max_tokens": 200,
 							// "top_p": 1,
 							"frequency_penalty": 0.37,
 							"presence_penalty": 0,
@@ -336,6 +358,7 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 				}
 			}
 
+			//sort the array by likes to views ratio
 			AllAboutTweetsArray.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
 			
 
@@ -371,15 +394,10 @@ const getPage = async (params, options, nextToken,url) => {
 
 
 
-
-
-
-
-
-
 async function getTwitterUserId(tweeterUserHadleToPullTweets) {
 
-	console.log(" gettin user id ")
+	console.log(" Gettin user id first ")
+
 	const endpointURL1 = "https://api.twitter.com/2/users/by?usernames="
 	// These are the parameters for the API request
 	// specify User names to fetch, and any additional fields that are required

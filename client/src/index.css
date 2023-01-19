@@ -271,3 +271,9 @@ code {
 }
 
 .button:focus { outline:0; }
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #707070;
+}

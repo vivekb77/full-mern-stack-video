@@ -26,7 +26,7 @@ export default function Card(props) {
               {props.tweet &&   <p className="card-text"><span style={{color: `${color}`}}>{ `Likes/Views - ${ratio}% || Replies/Views - ${ratio1}% `}</span> { ` || Views - ${props.tweet.impression_count} || Likes - ${props.tweet.like_count} || Replies - ${props.tweet.reply_count} || Retweets - ${props.tweet.retweet_count} || Q Tweets - ${props.tweet.quote_count}`}</p>}
                {props.tweet &&  <h6 className="card-text">{`AI Analysis - ${props.tweet.tweetSentiment}`}</h6>}
                {props.tweet &&  <h6 className="card-text">{`New Tweet - ${props.tweet.newtweet}`}</h6>}
-               {props.tweet &&<a href={`${props.tweet.tweetID}`} target="_blank" rel="noreferrer">View Tweet on Twitter by {`${props.tweet.TwitteruserFullName}`}</a>} 
+               {props.tweet &&<a href={`${props.tweet.tweetID}`} target="_blank" rel="noreferrer">View this Tweet on Twitter by {`${props.tweet.TwitteruserFullName}`}</a>} 
 
             </div>
         </div>
