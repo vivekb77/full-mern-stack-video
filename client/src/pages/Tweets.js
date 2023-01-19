@@ -32,6 +32,8 @@ const Tweets = () => {
 	async function GetTweets(event) {
 		event.preventDefault()
 
+		setTweets(tweets => []);
+
 		const req = await fetch('http://localhost:1337/api/tweets', {
 			method: 'POST',
 			headers: {
@@ -39,12 +41,14 @@ const Tweets = () => {
 				'x-access-token': localStorage.getItem('token'),
 			},
 			body: JSON.stringify({
-				tweeterUserIdToPullTweets: twitterUserID,
+				tweeterUserHadleToPullTweets: twitterUserID,
 			}),
+			
 		})
 
 		const data = await req.json()
 		if (data.status === 'ok') {
+			// console.log('data is ', data.error)
 			for (let i=0;i<data.tweets.length;i++){ 
 
 				const obj = {
@@ -55,15 +59,16 @@ const Tweets = () => {
 					like_count: data.tweets[i].like_count,
 					reply_count: data.tweets[i].reply_count,
 					quote_count: data.tweets[i].quote_count,
-					retweet_count: data.tweets[i].retweet_count
+					retweet_count: data.tweets[i].retweet_count,
+					newtweet: data.tweets[i].newtweet,
+					TwitteruserFullName: data.tweets[i].TwitteruserFullName
 				}
 
 				setTweets(prevArray => [...prevArray, obj])
 				
               }
-				
-
-		} else {
+		} 
+		else if(data.status === 'error'){
 			alert(data.error)
 		}
 	}

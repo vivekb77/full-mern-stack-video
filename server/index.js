@@ -5,7 +5,7 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const UserData = require('./models/user.model')
 const TweetData = require('./models/tweet.model')
-const AllTweetData = require('./models/alltweet.model')
+// const AllTweetData = require('./models/alltweet.model')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 
@@ -88,35 +88,63 @@ app.listen(1337, () => {
 
 
 
+let TwitteruserFullName = null;
+let tweeterUserIdToPullTweets = null;
 
 app.post('/api/tweets', async (req, res) => {
 	const token = req.headers['x-access-token']
 
-	let tweeterUserIdToPullTweets = req.body.tweeterUserIdToPullTweets;
+	let tweeterUserHadleToPullTweets = req.body.tweeterUserHadleToPullTweets;
+	
 
-	await getUserTweets(tweeterUserIdToPullTweets);
+	try{
+		const response = await getTwitterUserId(tweeterUserHadleToPullTweets);
+
+		tweeterUserIdToPullTweets = response.data[0].id;
+		TwitteruserFullName = response.data[0].name;
+
+		if(tweeterUserIdToPullTweets == null){
+			return res.json({ status: 'error', error: 'Twitter user not found' })
+		}
+		if(tweeterUserIdToPullTweets != null){
+			await getUserTweets(tweeterUserIdToPullTweets);
+		}
+		
+	} catch (error) {
+		return res.json({ status: 'error', error: 'Twitter user not found' })
+	}
+	
 
 	try {
 		
+
+		console.log("started analysis of tweets by AI")
+
 		const decoded = jwt.verify(token, 'secret123')
 		const email = decoded.email
 
-		await TweetData.create({
-			Email: email ,
-			TweeterUserIDtopullTweets: tweeterUserIdToPullTweets,
-			AllAboutTweetsArray: AllAboutTweetsArray,
-			TwitteruserName:TwitteruserName,
-			CreatedDate : new Date()
+		if(AllAboutTweetsArray.length>0){
+			await TweetData.create({
+				Email: email ,
+				TweeterUserIDtopullTweets: tweeterUserIdToPullTweets,
+				AllAboutTweetsArray: AllAboutTweetsArray,
+				TwitteruserName:TwitteruserName,
+				CreatedDate : new Date()
+			}
+			
+			)
+			console.log("added all tweet data after analysis")
+			
+			return res.json({ status: 'ok', tweets: AllAboutTweetsArray  })
 		}
-		
-		)
-		console.log("added all tweet data after analysis")
-		
-		return res.json({ status: 'ok', tweets: AllAboutTweetsArray  })
+		else{
+			console.log("no tweets found")
+			return res.json({ status: 'error', error: 'Something went wrong while retrieving tweets' })
+		}
 
 	} catch (error) {
 		console.log(error)
-		res.json({ status: 'error', error: 'invalid token' })
+		res.json({ status: 'error', error: 'Something went wrong while retrieving tweets' })
 	}
 })
 
@@ -145,7 +173,7 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
     let params = {
 
 
-		'max_results': 30, //hasNextPage = false;  so that only max 95 tweets are pulled on first page 
+		'max_results': 10, //hasNextPage = false;  so that only max 95 tweets are pulled on first page 
         "expansions": "author_id",
 		'tweet.fields':('author_id','created_at','id', 'lang', 'public_metrics' ),
 
@@ -185,107 +213,137 @@ const url = `https://api.twitter.com/2/users/${userId}/tweets`;
 
     console.log(`Got ${userTweets.length} Tweets from ${userName} (user ID ${userId})!`);
 
+	//////////AI thingy///////////////
 	
 	TwitteruserName = userName
 	const { Configuration, OpenAIApi } = require("openai");
 		
 	const configuration = new Configuration({
-	apiKey: "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",
+	apiKey: "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",
 	});
 	const openai = new OpenAIApi(configuration);
 
+		try {
+			//clear the array first 
+			AllAboutTweetsArray = []
+			// console.log("length of tweets analysed is  "+AllAboutTweetsArray.length)
 
-	for (i=0;i<userTweets.length;i++){ 
+			for (i=0;i<userTweets.length;i++){ 
 
-		let likesTOviewsRatio = ((userTweets[i].public_metrics.like_count/userTweets[i].public_metrics.impression_count)*100).toFixed(3);
+				let likesTOviewsRatio = ((userTweets[i].public_metrics.like_count/userTweets[i].public_metrics.impression_count)*100).toFixed(3);
 
-		//filter out quote , retweets and replies
-		let tweetType 
-		if (userTweets[i].text.startsWith("RT @")){
-			tweetType = "retweet"
-		}
-		else if (userTweets[i].text.startsWith("@")){
-			tweetType = "reply"
-		}
-		// else if (userTweets[i].text.startsWith("“")){
-		// 	tweetType = "quote" //does not work as quote tweets are not in the same format
-		// }
-		else {
+				//filter out quote , retweets and replies
+				let tweetType 
+				if (userTweets[i].text.startsWith("RT @")){
+					tweetType = "retweet"
+				}
+				else if (userTweets[i].text.startsWith("@")){
+					tweetType = "reply"
+				}
+				// else if (userTweets[i].text.startsWith("“")){
+				// 	tweetType = "quote" //does not work as quote tweets are not in the same format
+				// }
+				else {
 
-			tweetType = "tweet"
-		}
-		
-		let prompt;
-		if (tweetType == "tweet"){
-
-			if(likesTOviewsRatio >= 2){
-				myanalysis = "Engagement is above average, here are some reasons and a similar tweet you can post for high engagement rate.  ";
-				prompt = userTweets[i].text + "Engagement is above average, Brainstorm the reasons why this tweet was so popular? Generate a similar tweet to post for high engagement rate.";
-			}
-			else if(likesTOviewsRatio >= 1){
-				myanalysis = "Engagement is average, here are some reasons and a better tweet you can post for high engagement rate.";
-				prompt = userTweets[i].text +"Engagement is average, Brainstorm the reasons why this tweet was not so popular? Generate a better tweet to post for high engagement rate.";
-			}
-			else if(likesTOviewsRatio < 1){
-				myanalysis = "Engagement is below average, here are some reasons and a better tweet you can post for high engagement rate.  ";
-				prompt = userTweets[i].text + "Engagement is below average, Brainstorm the reasons why this tweet performed poor? Generate a different tweet to post for high engagement rate.";
-			}
-			else{
-				myanalysis =  "Engagement is below average, here are some reasons and a better tweet you can post for high engagement rate.  ";
-				prompt = userTweets[i].text + "Engagement is below average, Brainstorm the reasons why this tweet performed poor? Generate a different tweet to post for high engagement rate.";
-			}
-			
-		}
-		// if (tweetType == "retweet"){
-		// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
-		// 	 myanalysis = "it is retweet";
-		// }
-		// if (tweetType == "reply"){
-		// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
-		// 	 myanalysis = " it is a reply";
-		// }
-		
-				//call AI
-		if (tweetType == "tweet"){
-
-				console.log("run is "+ i);
-
-				const response = await openai.createCompletion({
-					"model": "text-curie-001",
-					// "model": "text-davinci-003",
-					"prompt": prompt,
-					"temperature": 0.9,
-					"max_tokens": 200,
-					// "top_p": 1,
-					"frequency_penalty": 0.37,
-					"presence_penalty": 0,
-					// "stop": ["\n\n"]
-				});
-
-				let tweetSentiment = (myanalysis + ". "+response.data.choices[0].text.trim())
-
-
-				// add all data to array
-
-				let allTweetDataobj = {
-					tweet: userTweets[i].text,
-					tweetType: tweetType,
-					tweetID: `https://twitter.com/${userName}/status/${userTweets[i].id}`,
-					retweet_count:userTweets[i].public_metrics.retweet_count,
-					reply_count:userTweets[i].public_metrics.reply_count,
-					like_count: userTweets[i].public_metrics.like_count,
-					quote_count: userTweets[i].public_metrics.quote_count,
-					impression_count : userTweets[i].public_metrics.impression_count,
-					tweetSentiment:tweetSentiment,
-					likesTOviewsRatio:likesTOviewsRatio
-				};
-
-				AllAboutTweetsArray.push(allTweetDataobj);
+					tweetType = "tweet"
+				}
 				
-		}
-	}
+				let prompt;
+				if (tweetType == "tweet"){
 
-	AllAboutTweetsArray.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
+					
+
+					if(likesTOviewsRatio >= 2){
+						myanalysis = "Engagement is above average..";
+						prompt = `Read this tweet then answer the following questions:\n\n\"\"\"\n${userTweets[i].text}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Sentiment of tweets.\n\n`;
+					}
+					else if(likesTOviewsRatio >= 1){
+						myanalysis = "Engagement is average.";
+						prompt = `Read this tweet then answer the following questions:\n\n\"\"\"\n${userTweets[i].text}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Sentiment of tweets.\n\n`;
+					}
+					else if(likesTOviewsRatio < 1){
+						myanalysis = "Engagement is below average.";
+						prompt = `Read this tweet then answer the following questions:\n\n\"\"\"\n${userTweets[i].text}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Sentiment of tweets.\n\n`;
+					}
+					else{
+						myanalysis = "Engagement is below average.";
+						prompt = `Read this tweet then answer the following questions:\n\n\"\"\"\n${userTweets[i].text}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Sentiment of tweets.\n\n`;
+					}
+					
+				}
+				// if (tweetType == "retweet"){
+				// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
+				// 	 myanalysis = "it is retweet";
+				// }
+				// if (tweetType == "reply"){
+				// 	 prompt = userTweets[i].text + " What is sentiment of this tweet?";
+				// 	 myanalysis = " it is a reply";
+				// }
+				
+					
+				if (tweetType == "tweet"){
+
+						console.log("run is "+ i);
+
+						//analyse the tweet
+						const analysetweet = await openai.createCompletion({
+							"model": "text-curie-001",
+							// "model": "text-davinci-003",
+							"prompt": prompt,
+							"temperature": 0.9,
+							"max_tokens": 200,
+							// "top_p": 1,
+							"frequency_penalty": 0.37,
+							"presence_penalty": 0,
+							// "stop": ["\n\n"]
+						});
+
+						let tweetSentiment = (myanalysis + ". "+analysetweet.data.choices[0].text.trim())
+						let promptfornewtweet = "This is a tweet " + userTweets[i].text + ". " + "And this is analysis on the tweet. " +analysetweet.data.choices[0].text.trim() + " Now write a new tweet based on the analysis. \n\n"
+
+				//new tweet
+						const newtweet = await openai.createCompletion({
+							"model": "text-curie-001",
+							// "model": "text-davinci-003",
+							"prompt": promptfornewtweet,
+							"temperature": 0.9,
+							"max_tokens": 400,
+							// "top_p": 1,
+							"frequency_penalty": 0.37,
+							"presence_penalty": 0,
+							// "stop": ["\n\n"]
+						});
+
+						// add all data to array
+
+						let allTweetDataobj = {
+							tweet: userTweets[i].text,
+							tweetType: tweetType,
+							tweetID: `https://twitter.com/${userName}/status/${userTweets[i].id}`,
+							retweet_count:userTweets[i].public_metrics.retweet_count,
+							reply_count:userTweets[i].public_metrics.reply_count,
+							like_count: userTweets[i].public_metrics.like_count,
+							quote_count: userTweets[i].public_metrics.quote_count,
+							impression_count : userTweets[i].public_metrics.impression_count,
+							tweetSentiment:tweetSentiment,
+							likesTOviewsRatio:likesTOviewsRatio,
+							newtweet:newtweet.data.choices[0].text.trim(),
+							TwitteruserFullName:TwitteruserFullName
+						};
+
+						AllAboutTweetsArray.push(allTweetDataobj);
+						
+				}
+			}
+
+			AllAboutTweetsArray.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
+			
+
+		} catch (error) {
+			console.log(error)
+		}
+
+
 
 }
 
@@ -306,6 +364,7 @@ const getPage = async (params, options, nextToken,url) => {
     } catch (err) {
 		console.log("error is -----------" +JSON.stringify(err))
         throw new Error(`Request failed: ${err}`);
+		
     }
 }
 
@@ -318,299 +377,32 @@ const getPage = async (params, options, nextToken,url) => {
 
 
 
+async function getTwitterUserId(tweeterUserHadleToPullTweets) {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// AI
-
-
-let tweeterUserIdToAnalyse;
-let userTweetsArrayforAI = [];
-let AIanalysisArray= [];
-let TotalTokensUsed =0 ;
-let PromptTokensUsed = 0;
-let CompletionTokensUsed = 0;
-
-app.post('/api/ai', async (req, res) => {
-	const token = req.headers['x-access-token']
-
-	tweeterUserIdToAnalyse = req.body.tweeterUserIdToAnalyse;
-
-	try {
-
-		//get tweets from DB for the user
-		const TwiterUser =  await TweetData.findOne({
-			TwitteruserName: tweeterUserIdToAnalyse,
-		})
-
-		for (i=0;i<TwiterUser.Tweets.length;i++){ 
-			userTweetsArrayforAI.push(TwiterUser.Tweets[i]);
-
-		}
-
-		//open ai call
-		console.log("totals runs will be  -- "+userTweetsArrayforAI.toString().length/5000)
-
-	let slicedata = 0;
-
-	// for (let i = 0; i < userTweetsArrayforAI.toString().length/5000; i++)
-	for (let i = 0; i < 4; i++)
-	{
-		console.log("run is "+i)
-		// console.log("slicedata is "+slicedata)
-
-		let prompttext = userTweetsArrayforAI.toString().slice(slicedata, slicedata+4900);
-		// let prompt: `What are the key points from this text:\n\n\"\"\"\n${prompttext}\n\"\"\"\n\nThe key points are:`,
-		// console.log("prompt is "+prompt)
-
-		finalprompt = `Read these tweets then answer the following questions:\n\n\"\"\"\n${prompttext}\n\"\"\"\n\nQuestions:\n1. What topic do the tweets talk about?\n2. Who are mentioned in these tweets?\n3. Pull all hashtags in these tweets.\n4. Sentiment of tweets.\n\nAnswers:\n1.`;
-
-		const { Configuration, OpenAIApi } = require("openai");
-		
-		const configuration = new Configuration({
-		apiKey: "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",
-		});
-
-	
-		const openai = new OpenAIApi(configuration);
-
-		const response = await openai.createCompletion({
-			"model": "text-curie-001",
-			"prompt": finalprompt,
-			"temperature": 0.9,
-			"max_tokens": 200,
-			"top_p": 1,
-			"frequency_penalty": 0.37,
-			"presence_penalty": 0,
-			"stop": ["\n\n"]
-		});
-
-		AIanalysisArray.push(response.data.choices[0].text.trim())
-
-		TotalTokensUsed = TotalTokensUsed + response.data.usage.total_tokens;
-		PromptTokensUsed = PromptTokensUsed + response.data.usage.prompt_tokens;
-		CompletionTokensUsed = CompletionTokensUsed + response.data.usage.completion_tokens;
-		// console.log("comp tokens "+CompletionTokensUsed)
-		slicedata = slicedata+4900;
-		
-
-
+	console.log(" gettin user id ")
+	const endpointURL1 = "https://api.twitter.com/2/users/by?usernames="
+	// These are the parameters for the API request
+	// specify User names to fetch, and any additional fields that are required
+	// by default, only the User ID, name and user name are returned
+	const params = {
+		usernames: tweeterUserHadleToPullTweets, // Edit usernames to look up
+		"user.fields": "created_at,entities", // Edit optional query parameters here
+		// "expansions": "pinned_tweet_id"
 	}
-	
-		//update DB with AI analysis
-		await TweetData.updateOne(
-			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { AIAnalysis: AIanalysisArray } }
-		)
-		await TweetData.updateOne(
-			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { TotalTokensUsed: TotalTokensUsed.toString()} }
-		)
-		await TweetData.updateOne(
-			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { PromptTokensUsed: PromptTokensUsed.toString() } }
-		)
-		await TweetData.updateOne(
-			{ TwitteruserName: tweeterUserIdToAnalyse },
-			{ $set: { CompletionTokensUsed: CompletionTokensUsed.toString() } }
-		)
 
+	// this is the HTTP header that adds bearer token authentication
+	const res = await needle('get', endpointURL1, params, {
+		headers: {
+			"User-Agent": "v2UserLookupJS",
+			"authorization": `Bearer ${bearerToken}`
+		}
+	})
 
-		return res.json({ status: 'ok', AItweets: AIanalysisArray })
-
-	} catch (error) {
-		console.log(JSON.stringify(error))
-		res.json({ status: 'error', error: 'Something went wrong' })
+	if (res.body) {
+		return res.body;
+	} else {
+		throw new Error('Unsuccessful request')
 	}
-})
+}
 
-
-
-app.post('/api/download', async (req, res) => {
-	const token = req.headers['x-access-token']
-
-	dataToDownload = [];
 	
-	tweeterUserIdToDownlaod = req.body.tweeterUserIdToAnalyse;
-
-	try {
-
-		//get tweets from DB for the user
-		const TwiterUserData =  await TweetData.findOne({
-			TwitteruserName: tweeterUserIdToDownlaod,
-		})
-
-		for (i=0;i<TwiterUserData.AIAnalysis.length;i++){ 
-			dataToDownload.push(TwiterUserData.AIAnalysis[i]);
-
-		}
-
-		return res.json({ status: 'ok', AItweets: dataToDownload })
-
-	} catch (error) {
-		console.log(error)
-		res.json({ status: 'error', error: 'Something went wrong' })
-	}
-})
-
-
-app.post('/api/downloadtweets1111', async (req, res) => {
-	const token = req.headers['x-access-token']
-
-	dataToDownload = [];
-	
-	tweeterUserIdToDownlaod = req.body.tweeterUserIdToAnalyse;
-
-	try {
-
-		//get tweets from DB for the user
-		const TwiterUserData =  await TweetData.findOne({
-			TwitteruserName: tweeterUserIdToDownlaod,
-		})
-
-		for (i=0;i<TwiterUserData.Tweets.length;i++){ 
-			dataToDownload.push(TwiterUserData.Tweets[i]);
-
-		}
-
-
-		return res.json({ status: 'ok', Usertweets: dataToDownload })
-
-	} catch (error) {
-		console.log(error)
-		res.json({ status: 'error', error: 'Something went wrong' })
-	}
-})
-
-
-
-
-
-
-// this is 
-
-// a 
-
-// new 
-
-// use case
-//https://developer.twitter.com/en/docs/twitter-api/tweets/search/integrate/build-a-query#boolean
-// https://developer.twitter.com/en/docs/twitter-api/enterprise/rules-and-filtering/operators-by-product
-
-
-app.post('/api/downloadtweets', async (req, res) => {
-	
-	let tweeterUserIdToAnalyse = req.body.tweeterUserIdToAnalyse;
-	console.log(tweeterUserIdToAnalyse);
-	
-	const token = 'AAAAAAAAAAAAAAAAAAAAAFzulAEAAAAAPdn2mYtxvCrm9%2BaE8tKnN2qy%2BVI%3D5vwJOXxAPCslAncjT7C2JTWJzW9yUtWIAPIs9FABTqIFpB97n2';
-
-	const endpointUrl = "https://api.twitter.com/2/tweets/search/recent";
-	
-	try {
-		
-	async function getRequest() {
-	
-		//“Twitter API”, in "" will do exact search 
-		// -wordhere will not include word in the search
-		// has:media has:images has:links has:videos
-		// place:"new york city" OR place:seattle
-		// place_country:US OR place_country:MX OR place_country:CA
-		// from:twitteruser -has:hashtags
-		//followers_count:500 tweets_count:1000  following_count:500
-	
-		
-		const params = {
-			// 'query': ' "openai" -is:retweet -is:quote is:reply lang:en ',
-			'query': 'from:TestEraAI -is:retweet -is:quote is:reply lang:en ',
-			'max_results': 0,
-			// 'start_time': '2023-01-11T00:00:00Z',
-			// 'end_time': '2023-01-15T00:00:00Z',
-			'tweet.fields':('author_id','created_at','id', 'lang', 'public_metrics' )
-			
-		}
-	
-		const res = await needle('get', endpointUrl, params, {
-			headers: {
-				"User-Agent": "v2RecentSearchJS",
-				"authorization": `Bearer ${token}`
-			}
-		})
-	
-		if (res.body) {
-			return res.body;
-			
-		} else {
-			throw new Error('Unsuccessful request');
-		}
-	}
-	
-
-
-	(async () => {
-	
-		try {
-			// Make request
-			const response111 = await getRequest();
-			console.log("dfsdsfds-----"+JSON.stringify(response111));
-
-				for (i=0;i<response111.data.length;i++){ 
-					// if(response111.data[i].public_metrics.impression_count>1000)
-					// {
-				
-						await AllTweetData.create({
-								TweetText: response111.data[i].text,
-								TweetId: response111.data[i].id,
-								retweet_count: response111.data[i].public_metrics.retweet_count,
-								reply_count:response111.data[i].public_metrics.reply_count,
-								like_count:response111.data[i].public_metrics.like_count,
-								quote_count:response111.data[i].public_metrics.quote_count,
-								impression_count:response111.data[i].public_metrics.impression_count,
-							
-						})
-					// }
-				}
-				console.log("tweets with likes and all added to DB")
-
-		} catch (e) {
-			console.log("error is "+e);
-			process.exit(-1);
-		}
-		
-		process.exit();
-		
-	})();
-	
-	}
-	
-	catch (err) {
-			res.json({ status: 'error', error: 'error occured line 398' })
-			console.log("error is  ---" +err)
-		}
-	
-})
-
-
-
-
-
-
