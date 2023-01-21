@@ -22,13 +22,13 @@ export default function Card(props) {
         <div className="card">
             <div className="card-body">
 
-              {props.tweet && <h5 className="card-title"><span style={{color: `#808080`}}>Tweet - </span>{props.tweet.tweet}`</h5>}
+              {props.tweet && <h5 className="card-title"><span style={{color: `#808080`}}>Tweet - </span>{props.tweet.tweet}</h5>}
               {props.tweet && <hr/>}
               {props.tweet && <p className="card-text"><span style={{color: `${color}`}}>{ `Likes/Views - ${ratio}% | Replies/Views - ${ratio1}% `}</span> { ` | Views - ${props.tweet.impression_count} | Likes - ${props.tweet.like_count} | Replies - ${props.tweet.reply_count} | Retweets - ${props.tweet.retweet_count} | Q Tweets - ${props.tweet.quote_count}`}</p>}
                {props.tweet.tweetSentiment &&  <h6 className="card-text">{`New Tweet for you - ${props.tweet.tweetSentiment}`}</h6>}
                {/* {props.tweet.newtweet &&  <h6 className="card-text"><span style={{color: `#808080`}}>Tweet for you </span></h6>} */}
                {props.tweet.newtweet &&  <h6 className="card-text"><span style={{color: `#808080`}}>Tweet by AI - </span>{`  ${props.tweet.newtweet}`}</h6>}
-               <button className="copybutton" onClick={() => {navigator.clipboard.writeText(props.tweet.newtweet);}}>Copy Tweet</button>
+               {props.tweet.newtweet && <button className="copybutton" onClick={() => {navigator.clipboard.writeText(props.tweet.newtweet);}}>Copy Tweet</button>}
                <br/>
                <br/>
                <br/>

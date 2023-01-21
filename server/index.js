@@ -14,10 +14,10 @@ app.use(cors())
 app.use(express.json())
 
 // prod
-// mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/?retryWrites=true&w=majority')
+mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/?retryWrites=true&w=majority')
 
 // dev
-mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test')
+// mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test')
 
 
 app.post('/api/register', async (req, res) => {
@@ -74,9 +74,7 @@ app.post('/api/login', async (req, res) => {
 	}
 })
 
-app.listen(1337, () => {
-	console.log('Server started on 1337')
-})
+
 
 
 // EXAMPLES START
@@ -266,6 +264,7 @@ const getUserTweets = async (tweeterUserIdToPullTweets) => {
 		//clear the array first 
 		AllAboutTweetsArray = []
 		total_tokens_used_forrun = 0;
+
 		for (i = 0; i < userTweets.length; i++) {
 
 			let likesTOviewsRatio = ((userTweets[i].public_metrics.like_count / userTweets[i].public_metrics.impression_count) * 100).toFixed(3);
@@ -278,16 +277,34 @@ const getUserTweets = async (tweeterUserIdToPullTweets) => {
 			else if (userTweets[i].text.startsWith("@")) {
 				tweetType = "reply"
 			}
-			else if (userTweets[i].text.includes("https") || userTweets[i].text.includes("@") || userTweets[i].text.includes("t.co") || userTweets[i].text.length < 50) {
+
+
+			else if (userTweets[i].text.includes("https") || userTweets[i].text.includes("@") || userTweets[i].text.includes("t.co") || userTweets[i].text.length < 50 ) {
 
 				tweetType = "notonpoint"  //tweets with @ and urls anywhere in them are not hight quality and are filtered out
 			}
-			else {
 
+
+			else if (!userTweets[i].text.trim().match(/^[A-Za-z0-9!“”'@#\$%\^\&*\)\(+=.?_-\s,:;]+$/)) {
+				tweetType = "notenglishtweet" //non english tweets are filtered out 
+				//this also filter out ' and " ---fix it later
+				// console.log("String is not in english -----" +userTweets[i].text);
+
+			}
+			else {
 				tweetType = "tweet" //tweets and quote tweets filtered out
 			}
 
-			let prompt;
+			//to filter out non english tweets
+			// let regex = /^[A-Za-z0-9!@#\$%\^\&*\)\(+=._-\s]+$/;
+			// 		if (userTweets[i].text.trim().match(regex)) {
+			// 			// console.log("String is valid1");
+			// 		} else {
+			// 			// console.log("String is not valid1");
+			// 		}
+
+
+			// let prompt;
 			if (tweetType == "tweet") {
 
 				// if(likesTOviewsRatio >= 2){
@@ -307,8 +324,6 @@ const getUserTweets = async (tweeterUserIdToPullTweets) => {
 				// 	prompt = `Read this tweet then answer the following questions:\n\n\"\"\"\n${userTweets[i].text}\n\"\"\"\n\nQuestions:\n1. Extract keywords that makes a Tweet viral.\n2. Who are mentioned in these tweets?\n3. Sentiment of tweets.\n4.Create an analogy.\n\n`;
 				// }
 
-				prompt = `${userTweets[i].text.trim()} Write a new Tweet using the following Tweet. No hashtags.`;
-
 			}
 
 
@@ -317,9 +332,8 @@ const getUserTweets = async (tweeterUserIdToPullTweets) => {
 				//only get analysis for 5 tweets to save cost and get results faster
 				
 				if(AllAboutTweetsArray.length<5){
-
-					console.log("run is " + i);
-
+					console.log("AI run is " +i)
+ 
 					//analyse the tweet
 					// const analysetweet = await openai.createCompletion({
 					// 	"model": "text-curie-001",
@@ -334,11 +348,6 @@ const getUserTweets = async (tweeterUserIdToPullTweets) => {
 					// });
 
 
-					// let tweetSentiment = (myanalysis + ". "+analysetweet.data.choices[0].text.trim())
-
-					// let promptfornewtweet = "This is a tweet " + userTweets[i].text + ". " +analysetweet.data.choices[0].text.trim() + " Now write a new tweet based on the analysis. \n\n"
-
-					// let tweetSentiment = (analysetweet.data.choices[0].text.trim());
 					let promptfornewtweet = `Write a new Tweet using the following Tweet in the same style. Don't add hashtags. ${userTweets[i].text.trim()}`;
 
 					//generate a new tweet
@@ -451,3 +460,8 @@ async function getTwitterUserId(tweeterUserHadleToPullTweets) {
 	}
 }
 
+
+
+app.listen(1337, () => {
+	console.log('Server started on 1337')
+})
