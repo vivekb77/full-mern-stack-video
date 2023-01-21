@@ -9,12 +9,16 @@ const Tweets = () => {
 	const [twitterUserID, settwitterUserID] = useState('')
 	const [disable, setDisable] = React.useState(false);
 	const [handle, setHandle] = React.useState();
+	const [userName, setUserName] = React.useState();
+	const [errormessage, setErrormessage] = React.useState();
+
+	
 
 
 	useEffect(() => {
 		const token = localStorage.getItem('token')
 		
-
+		// https://mudit.hashnode.dev/5-things-you-should-know-about-useeffect
 		if (token) {
 			const user = jwt.decode(token)
 			if (!user) {
@@ -23,20 +27,22 @@ const Tweets = () => {
 				history.replace('/login')
 				
 			} else {
-				// populateQuote()do something
+				// populateQuote()do something //cleanup function
 				// console.log('user is ', user)
 			}
 		}else{
 			history.replace('/login')
 		}
 
-	})
+	},[])
 
 	async function GetTweets(event) {
 		event.preventDefault()
 		setDisable(true);
 		setTweets(tweets => []);
+		setUserName(userName => "");
 		setHandle(handle => "");
+		setErrormessage(errormessage => "");
 
 		const req = await fetch('http://localhost:1337/api/tweets', {
 			method: 'POST',
@@ -72,6 +78,7 @@ const Tweets = () => {
 				setTweets(prevArray => [...prevArray, obj])
 				
 				setHandle(handle => data.tweets[0].TwitteruserFullName);
+				setUserName(userName => data.tweets[0].TwitteruserFullName);
 				setDisable(false);
 				
 				
@@ -79,7 +86,8 @@ const Tweets = () => {
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
-			alert(data.error)
+			setErrormessage(userName => data.error);
+			// alert(data.error)
 			
 		}
 	}
@@ -91,33 +99,36 @@ const Tweets = () => {
 
 	return (
 		<div className='tweetdiv'>
-			<br/>
-			 <h1>GalaxzAI - Get analysis of Tweets for any Twitter user </h1>
-			 {/* <h1>Tweets Analytics by AI</h1> */}
-			 <h5>Why some tweets go viral and some don't. We break down that and suggest new tweets based on the analysis</h5>
+		<div className='header'>
+			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
+			<h2 className='title'>Analyse user's Tweets, and write new Tweets in the same style</h2>
+			 {/* <h5>We analyse what makes some Tweets viral? Based on the analysis, we suggest new tweets</h5> */}
+			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
+			 <h2><a target="_blank" href="/">See Examples here</a></h2>
 			<form onSubmit={GetTweets}>
-			<h5>Enter Twitter user handle without @, case sensitive</h5>
+			{/* <h5>Enter a Twitter handle without @</h5> */}
 				<input
 					type="text"
 					className='userIdTextBox'
 					maxLength={70}
 					required
-					placeholder="Twitter User handle without @, case sensitive"
+					placeholder="Twitter User handle without @"
 					onChange={(e) => settwitterUserID(e.target.value)}
 				/>
-				<input type="submit" className='button' value={disable ? `InProgress...` : `Get Analysis` } disabled={disable}/>
+				
+				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={disable}/>
 				
 			</form>
-           
+			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
 			<br/>
-				<h2><a href="/">See Examples here</a></h2>
-
-			<h4>Want a same report for any user of their last 3000 tweets , <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4>
-			
-			{handle && <h4 className="card-title">{`Tweet Analysis for - ${handle}`}</h4>}
-			
-			<h6>Sorted by Likes/Views%</h6>
+			{disable && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>}
+			<br/>
+				{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
+			{/* {handle && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>} */}
+			{handle && <h4 className="card-title">{`@${handle} (${userName})`}</h4>}
+			</div>
+			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
 
 			{tweets.map((tweet,index) => {
 				return <Card 

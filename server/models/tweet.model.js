@@ -7,6 +7,8 @@ const TweetData = new mongoose.Schema(
 		TweeterUserIDtopullTweets: { type: String, required: false },
 		AllAboutTweetsArray: { type: Array, required: false }, 
 		TwitteruserName: { type: String, required: false },
+		TwitteruserFullName: { type: String, required: false },
+		total_tokens_used_forrun: { type: Number, required: false },
 		CreatedDate: { type: Date, required: true }
 		
 	},

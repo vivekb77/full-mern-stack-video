@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 // import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
+import NavBar from './Navbar'
 
 const Examples = () => {
 	// const history = useHistory()
@@ -36,9 +37,9 @@ const Examples = () => {
 	async function GetTweets(event) {
 		event.preventDefault()
 		setDisable(true);
-		setTweets(tweets => []);
-		setHandle(handle => "");
-		setUserName(userName => "");
+		
+		
+		
 
 		const req = await fetch('http://localhost:1337/api/examples', {
 			method: 'POST',
@@ -55,6 +56,10 @@ const Examples = () => {
 		const data = await req.json()
 		if (data.status === 'ok') {
 
+				setTweets(tweets => []); //clear them first
+				setUserName(userName => "");
+				setHandle(handle => "");
+
 			for (let i=0;i<data.tweets.AllAboutTweetsArray.length;i++){ 
 
 				const obj = {
@@ -67,10 +72,11 @@ const Examples = () => {
 					quote_count: data.tweets.AllAboutTweetsArray[i].quote_count,
 					retweet_count: data.tweets.AllAboutTweetsArray[i].retweet_count,
 					newtweet: data.tweets.AllAboutTweetsArray[i].newtweet,
-					// TwitteruserFullName: data.tweets.AllAboutTweetsArray[0].TwitteruserFullName,
+					TwitteruserFullName: data.tweets.AllAboutTweetsArray[i].TwitteruserFullName,
 					TwitteruserName: data.tweets.TwitteruserName,
 					
 				}
+				
 
 				setTweets(prevArray => [...prevArray, obj])
 				
@@ -88,42 +94,34 @@ const Examples = () => {
 		}
 	}
 
-	const handleClick = event => {
-
-		console.log('button disabled');
-	  };
+	
 
 	return (
+		
 		<div className='tweetdiv'>
+			{/* <NavBar sticky="top" /> */}
+		<div className='header'>
 			<br/>
-			 <h1>GalaxzAI - Get analysis of Tweets for any Twitter user </h1>
-			 {/* <h1>Tweets Analytics by AI</h1> */}
-			 <h5>Why some tweets go viral and some don't. We break down that and suggest new tweets based on the analysis</h5>
+			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
+			<h2 className='title'>Analyse user's last few Tweets, and write new Tweets in the same style</h2>
+			 {/* <h5>We analyse what makes some Tweets viral? Based on the analysis, we suggest new tweets</h5> */}
 
 			<form onSubmit={GetTweets}>
-			{/* <h5>Enter Twitter user handle without @, case sensitive</h5>
-				<input
-					type="text"
-					className='userIdTextBox'
-					maxLength={70}
-					required
-					placeholder="Twitter User handle without @, case sensitive"
-					onChange={(e) => settwitterUserID(e.target.value)}
-				/> */}
-
-				<h2>Keep clicking to get analysis of different Twitter accounts</h2>
-				<input type="submit" className='button' value={disable ? `InProgress...` : `Get Analysis` } disabled={disable}/>
-
-
-
+		
+				
+				<input type="submit" className='button' value={disable ? `      Analysing...      ` : ` Show me Examples ` } disabled={disable}/>
+				
 			</form>
-           
-			<h4>Want a same report for any user of their last 3000 tweets , <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4>
+
+			{handle && <h6>Click again to see another example</h6>}
+			{/* {!handle && <h6>Please wait..</h6>} */}
+			{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			
-			<h2><a href="/tweets">Analyse your Twitter account</a></h2>
-			{handle && <h4 className="card-title">{`Tweet Analysis for - @${handle} (${userName})`}</h4>}
+			<h2 className='title1'><a target="_blank" href="/tweets">Analyse other Twitter accounts here</a></h2>
+			{handle && <h4 className="card-title">{`@${handle} (${userName})`}</h4>}
 			
-			<h6>Sorted by Likes/Views%</h6>
+		</div>
+			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
 
 			{tweets.map((tweet,index) => {
 				return <Card 
