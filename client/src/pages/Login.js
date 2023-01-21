@@ -1,13 +1,18 @@
 import { useState } from 'react'
+require('dotenv').config();
+
+
+const baseURL = process.env.REACT_APP_BASE_URL
 
 function App() {
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+	
 
 	async function loginUser(event) {
 		event.preventDefault()
 
-		const response = await fetch('http://localhost:1337/api/login', {
+		const response = await fetch(`${baseURL}/api/login`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

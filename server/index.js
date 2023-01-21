@@ -7,21 +7,20 @@ const UserData = require('./models/user.model')
 const TweetData = require('./models/tweet.model')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
+require('dotenv').config();
 
-
+const MONGO_URL = process.env.MONGO_URL || 'mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test'
+const PORT = process.env.PORT || 1337
 
 app.use(cors())
 app.use(express.json())
 
 // prod
-mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/?retryWrites=true&w=majority')
-
-// dev
-// mongoose.connect('mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test')
+mongoose.connect(`${MONGO_URL}`)
 
 
 app.post('/api/register', async (req, res) => {
-	console.log(req.body)
+
 
 	try {
 
@@ -43,7 +42,7 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', async (req, res) => {
 
-
+console.log(req.body.email)
 	const user = await UserData.findOne({
 		email: req.body.email,
 	})
@@ -121,6 +120,7 @@ total_tokens_used_forrun = 0;
 
 app.post('/api/tweets', async (req, res) => {
 	const token = req.headers['x-access-token']
+
 
 	let tweeterUserHadleToPullTweets = req.body.tweeterUserHadleToPullTweets.trim();
 
@@ -462,6 +462,6 @@ async function getTwitterUserId(tweeterUserHadleToPullTweets) {
 
 
 
-app.listen(1337, () => {
-	console.log('Server started on 1337')
+app.listen(PORT, () => {
+	console.log(`Server started on ${PORT}`)
 })

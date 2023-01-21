@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { useHistory } from 'react-router-dom'
+require('dotenv').config();
+
+
+const baseURL = process.env.REACT_APP_BASE_URL
 
 function App() {
 	const history = useHistory()
@@ -14,7 +18,7 @@ function App() {
 
 		//this funtion is communicating with backend
 		//server folder , index.js file has this route /api/register
-		const response = await fetch('http://localhost:1337/api/register', {
+		const response = await fetch(`${baseURL}/api/register`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

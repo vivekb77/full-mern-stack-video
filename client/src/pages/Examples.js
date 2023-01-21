@@ -3,6 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
 import NavBar from './Navbar'
+require('dotenv').config();
+
+const baseURL = process.env.REACT_APP_BASE_URL
+
 
 const Examples = () => {
 	// const history = useHistory()
@@ -41,7 +45,7 @@ const Examples = () => {
 		
 		
 
-		const req = await fetch('http://localhost:1337/api/examples', {
+		const req = await fetch(`${baseURL}/api/examples`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',

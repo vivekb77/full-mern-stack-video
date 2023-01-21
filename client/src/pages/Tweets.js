@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react'
 import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
+require('dotenv').config();
+
+const baseURL = process.env.REACT_APP_BASE_URL
 
 const Tweets = () => {
 	const history = useHistory()
@@ -44,7 +47,8 @@ const Tweets = () => {
 		setHandle(handle => "");
 		setErrormessage(errormessage => "");
 
-		const req = await fetch('http://localhost:1337/api/tweets', {
+		const req = await fetch(`${baseURL}/api/tweets`, {
+
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -53,7 +57,7 @@ const Tweets = () => {
 			body: JSON.stringify({
 				tweeterUserHadleToPullTweets: twitterUserID,
 			}),
-			
+
 		})
 
 		const data = await req.json()
