@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react'
 // import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
+import ReactGA from 'react-ga';
 import NavBar from './Navbar'
 require('dotenv').config();
+
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
@@ -15,7 +17,7 @@ const Examples = () => {
 	const [disable, setDisable] = React.useState(false);
 	const [handle, setHandle] = React.useState();
 	const [userName, setUserName] = React.useState();
-
+	const [errormessage, setErrormessage] = React.useState();
 
 	// useEffect(() => {
 	// 	// const token = localStorage.getItem('token')
@@ -41,7 +43,7 @@ const Examples = () => {
 	async function GetTweets(event) {
 		event.preventDefault()
 		setDisable(true);
-		
+		setErrormessage(errormessage => "");
 		
 		
 
@@ -89,11 +91,19 @@ const Examples = () => {
 				setDisable(false);
 				
 				
+				ReactGA.event({
+					category: 'Examples',
+					action: 'An Example Viewed'
+				  });
               }
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
-			alert(data.error)
+			setErrormessage(userName => data.error);
+			ReactGA.exception({
+				description: 'An error ocurred on examples page',
+				fatal: true
+			  });
 			
 		}
 	}
@@ -108,16 +118,15 @@ const Examples = () => {
 			<br/>
 			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
 			<h2 className='title'>Analyse user's last few Tweets, and write new Tweets in the same style</h2>
-			 {/* <h5>We analyse what makes some Tweets viral? Based on the analysis, we suggest new tweets</h5> */}
-
+			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 			<form onSubmit={GetTweets}>
-		
+			
 				
-				<input type="submit" className='button' value={disable ? `      Analysing...      ` : ` Show me Examples ` } disabled={disable}/>
+				<input type="submit" className='button' value={disable ? `      Analysing...      ` : `  Show  Examples   ` } disabled={disable}/>
 				
 			</form>
 
-			{handle && <h6>Click again to see another example</h6>}
+			{handle && <h5>Click again to see another example</h5>}
 			{/* {!handle && <h6>Please wait..</h6>} */}
 			{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			
@@ -127,6 +136,7 @@ const Examples = () => {
 		</div>
 			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
 
+		
 			{tweets.map((tweet,index) => {
 				return <Card 
 				tweet={tweet}  key={index}

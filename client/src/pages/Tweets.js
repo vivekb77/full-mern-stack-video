@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
+import ReactGA from 'react-ga';
 require('dotenv').config();
 
 const baseURL = process.env.REACT_APP_BASE_URL
@@ -18,26 +19,26 @@ const Tweets = () => {
 	
 
 
-	useEffect(() => {
-		const token = localStorage.getItem('token')
+	// useEffect(() => {
+	// 	const token = localStorage.getItem('token')
 		
-		// https://mudit.hashnode.dev/5-things-you-should-know-about-useeffect
-		if (token) {
-			const user = jwt.decode(token)
-			if (!user) {
-				console.log('no user')
-				localStorage.removeItem('token')
-				history.replace('/login')
+	// 	// https://mudit.hashnode.dev/5-things-you-should-know-about-useeffect
+	// 	if (token) {
+	// 		const user = jwt.decode(token)
+	// 		if (!user) {
+	// 			console.log('no user')
+	// 			localStorage.removeItem('token')
+	// 			history.replace('/login')
 				
-			} else {
-				// populateQuote()do something //cleanup function
-				// console.log('user is ', user)
-			}
-		}else{
-			history.replace('/login')
-		}
+	// 		} else {
+	// 			// populateQuote()do something //cleanup function
+	// 			// console.log('user is ', user)
+	// 		}
+	// 	}else{
+	// 		history.replace('/login')
+	// 	}
 
-	},[])
+	// },[])
 
 	async function GetTweets(event) {
 		event.preventDefault()
@@ -84,6 +85,11 @@ const Tweets = () => {
 				setHandle(handle => data.tweets[0].TwitteruserFullName);
 				setUserName(userName => data.tweets[0].TwitteruserFullName);
 				setDisable(false);
+
+				ReactGA.event({
+					category: 'Tweets',
+					action: 'An AI Tweet Generated'
+				  });
 				
 				
               }
@@ -91,8 +97,10 @@ const Tweets = () => {
 		else if(data.status === 'error'){
 			setDisable(false);
 			setErrormessage(userName => data.error);
-			// alert(data.error)
-			
+			ReactGA.exception({
+				description: 'An error ocurred on Tweets page',
+				fatal: true
+			  });
 		}
 	}
 
@@ -106,12 +114,10 @@ const Tweets = () => {
 		<div className='header'>
 			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
 			<h2 className='title'>Analyse user's Tweets, and write new Tweets in the same style</h2>
-			 {/* <h5>We analyse what makes some Tweets viral? Based on the analysis, we suggest new tweets</h5> */}
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
 			 <h2><a target="_blank" href="/">See Examples here</a></h2>
 			<form onSubmit={GetTweets}>
-			{/* <h5>Enter a Twitter handle without @</h5> */}
 				<input
 					type="text"
 					className='userIdTextBox'
@@ -124,9 +130,9 @@ const Tweets = () => {
 				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={disable}/>
 				
 			</form>
-			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
+			{disable && <h5>Analysis and new Tweet genaration may take few seconds..Please wait..</h5>}
 			<br/>
-			{disable && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>}
+			{disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>}
 			<br/>
 				{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			{/* {handle && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>} */}

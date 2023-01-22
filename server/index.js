@@ -9,7 +9,8 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 require('dotenv').config();
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb+srv://reactuser:M1Js50hX2JYxkqsQ@galaxzcluster.sofxyos.mongodb.net/test'
+const MONGO_URL = process.env.MONGO_URL 
+// || 'mongodb+srv://reactuser:E1FUIOqG7D6FMQGD@galaxzcluster.sofxyos.mongodb.net/test'
 const PORT = process.env.PORT || 1337
 
 app.use(cors())
@@ -19,59 +20,59 @@ app.use(express.json())
 mongoose.connect(`${MONGO_URL}`)
 
 
-app.post('/api/register', async (req, res) => {
+// app.post('/api/register', async (req, res) => {
 
 
-	try {
+// 	try {
 
-		const newPassword = await bcrypt.hash(req.body.password, 10)
-		await UserData.create({
-			name: req.body.name,
-			email: req.body.email,
-			password: newPassword,
-			CreatedDate: new Date()
-		})
+// 		const newPassword = await bcrypt.hash(req.body.password, 10)
+// 		await UserData.create({
+// 			name: req.body.name,
+// 			email: req.body.email,
+// 			password: newPassword,
+// 			CreatedDate: new Date()
+// 		})
 
-		res.json({ status: 'ok' })
-	} catch (err) {
-		console.log("err" + err)
-		res.json({ status: 'error', error: 'Duplicate email' })
-		console.log("error is  ---" + err)
-	}
-})
+// 		res.json({ status: 'ok' })
+// 	} catch (err) {
+// 		console.log("err" + err)
+// 		res.json({ status: 'error', error: 'Duplicate email' })
+// 		console.log("error is  ---" + err)
+// 	}
+// })
 
-app.post('/api/login', async (req, res) => {
+// app.post('/api/login', async (req, res) => {
 
-console.log(req.body.email)
-	const user = await UserData.findOne({
-		email: req.body.email,
-	})
+// console.log(req.body.email)
+// 	const user = await UserData.findOne({
+// 		email: req.body.email,
+// 	})
 
-	if (!user) {
-		console.log('no user')
-		return { status: 'error', error: 'Invalid Email' }
+// 	if (!user) {
+// 		console.log('no user')
+// 		return { status: 'error', error: 'Invalid Email' }
 
-	}
+// 	}
 
-	const isPasswordValid = await bcrypt.compare(
-		req.body.password,
-		user.password
-	)
+// 	const isPasswordValid = await bcrypt.compare(
+// 		req.body.password,
+// 		user.password
+// 	)
 
-	if (isPasswordValid) {
-		const token = jwt.sign(
-			{
-				name: user.name,
-				email: user.email,
-			},
-			'secret123'
-		)
+// 	if (isPasswordValid) {
+// 		const token = jwt.sign(
+// 			{
+// 				name: user.name,
+// 				email: user.email,
+// 			},
+// 			'secret123'
+// 		)
 
-		return res.json({ status: 'ok', user: token })
-	} else {
-		return res.json({ status: 'error', user: false })
-	}
-})
+// 		return res.json({ status: 'ok', user: token })
+// 	} else {
+// 		return res.json({ status: 'error', user: false })
+// 	}
+// })
 
 
 
@@ -80,16 +81,18 @@ console.log(req.body.email)
 
 app.post('/api/examples', async (req, res) => {
 
-
 	pullexamplesforusers = [];
 
 
 	try {
 		const ExampleData = await TweetData.find({
-			Email: 'v@v.v'
+			Email: 'generic@email.com'
 		})
 
+		console.log(ExampleData[0].TwitteruserName)
+
 		for (let i = 0; i < ExampleData.length; i++) {
+			// for (let i = 0; i < 30; i++) {
 			pullexamplesforusers.push(ExampleData[i].TwitteruserName)
 		}
 
@@ -97,14 +100,14 @@ app.post('/api/examples', async (req, res) => {
 		pullexamplesforusers = [...new Set(pullexamplesforusers)];
 
 		const AllAboutTweetsArray = await TweetData.findOne({
-			Email: 'v@v.v',
+			Email: 'generic@email.com',
 			TwitteruserName: pullexamplesforusers[Math.floor(Math.random() * pullexamplesforusers.length)]
 		})
 		return res.json({ status: 'ok', tweets: AllAboutTweetsArray })
 
 	} catch (error) {
 		console.log(error)
-		res.json({ status: 'error', error: 'No high quality Tweets found for this user' })
+		res.json({ status: 'error', error: 'Please Try Again' })
 	}
 })
 
@@ -147,9 +150,10 @@ app.post('/api/tweets', async (req, res) => {
 
 	try {
 
-
-		const decoded = jwt.verify(token, 'secret123')
-		const email = decoded.email
+		//add this for login funtionality
+		// const decoded = jwt.verify(token, 'secret123')
+		// const email = decoded.email || "generic@email.com"
+		const email = "generic@email.com"
 
 		if (AllAboutTweetsArray.length > 0) {
 			await TweetData.create({
