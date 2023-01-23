@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 require('dotenv').config();
 
+
 const MONGO_URL = process.env.MONGO_URL 
 // || 'mongodb+srv://reactuser:E1FUIOqG7D6FMQGD@galaxzcluster.sofxyos.mongodb.net/test'
 const PORT = process.env.PORT || 1337
@@ -74,6 +75,27 @@ mongoose.connect(`${MONGO_URL}`)
 // 	}
 // })
 
+app.post('/api/admin', async (req, res) => {
+
+	try{
+		const Analyse = await TweetData.find({
+			Email: 'generic@email.com'
+		})
+		AdminArray = []
+		for (let i = 0; i < Analyse.length; i++) {
+			// console.log(Analyse[i].TwitteruserName)
+			AdminArray.push(Analyse[i].TwitteruserName)
+
+		}
+
+		return res.json({ status: 'ok', AdminArray: AdminArray })
+
+	} catch (error) {
+		res.json({ status: 'error', error: 'Admin error occured' })
+	}
+})
+
+
 
 
 
@@ -89,12 +111,15 @@ app.post('/api/examples', async (req, res) => {
 			Email: 'generic@email.com'
 		})
 
-		console.log(ExampleData[0].TwitteruserName)
+		// console.log(ExampleData[0].TwitteruserName)
 
 		for (let i = 0; i < ExampleData.length; i++) {
 			// for (let i = 0; i < 30; i++) {
 			pullexamplesforusers.push(ExampleData[i].TwitteruserName)
+			// console.log(ExampleData[i].TwitteruserName )  //see users analysed by the app
 		}
+
+		console.log("Total users analysed ----->"+pullexamplesforusers.length)
 
 		//remove duplicates
 		pullexamplesforusers = [...new Set(pullexamplesforusers)];

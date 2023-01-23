@@ -57,15 +57,38 @@ code {
 .title {
   font-size: 1.5em;
   text-align: center;
-  color: #333;
+  color: #000033;
   font-weight: 700;
   width: 80%;
 }
+.maintitle {
+  font-size: 1.6em;
+  text-align: center;
+  color: #003366;
+  font-weight: 800;
+  width: 80%;
+}
+.mainsubtitle{
+  font-size: 1.4em;
+  text-align: center;
+  color: #003366;
+  font-weight: 700;
+  width: 80%;
+}
+.mainsubtitleads{
+  font-size: 0.7em;
+  text-align: center;
+  color: #003366;
+  font-weight: 600;
+  width: 80%;
+}
+
+
 .title1 {
   margin-top: 30px;
   font-size: 1.5em;
   text-align: center;
-  color: #333;
+  color: #000033;
 }
 
 
@@ -89,21 +112,41 @@ code {
   box-shadow: 0 0 10px #ccc;
 }
 
+.admincard{
+  width: 90%;
+  height: 30%;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+
+  padding: 0px;
+  margin: 3px;
+  box-shadow: 0 0 10px #ccc;
+}
+.admincard-body{
+  /* display: flex; */
+  flex-direction: row;
+  align-items: left;
+  margin: 5%;
+}
+
 .card-title{
-  font-size: 1.7rem;
+  font-size: 1.4rem;
   font-weight: 600;
+  color: #000033;
 }
 
 .card-text{
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 550;
+  color: #000000;
 }
 
 
 .card-text > span {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 550;
-  color: #808080;
+  color: #000000;
   margin-bottom: 0%;
 }
 
@@ -117,6 +160,7 @@ code {
 
 .userIdTextBox{
   text-indent:20px;
+  font-size: 18px;
   width: 95%;
   height: 40px;
   border: 1px solid #ccc;
@@ -197,7 +241,6 @@ hr {
   margin-top: 5px;
 }
 
-
 /* COPY BUTTON */
 
 .copybutton {
@@ -250,6 +293,32 @@ hr {
 .copybutton:focus { outline:0; }
 
 /* COPY BUTTON END */
+
+/* unvisited link */
+a:link {
+  color: #003366;
+  text-decoration: none;
+}
+
+/* visited link */
+a:visited {
+  color: #003366;
+  text-decoration: none;
+}
+
+/* mouse over link */
+a:hover {
+  color: #003366;
+  text-decoration: none;
+}
+
+/* selected link */
+a:active {
+  color: #003366;
+  text-decoration: none;
+}
+
+
 
 @media screen and (max-width: 600px) {
 
@@ -307,6 +376,8 @@ hr {
  
   .button {
     width: 90%;
+    height: auto;
+    padding: 15px;
     font-size: 15px;
   }
 

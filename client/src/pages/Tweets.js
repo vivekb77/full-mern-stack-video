@@ -3,7 +3,9 @@ import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
 import ReactGA from 'react-ga';
+import { Helmet } from 'react-helmet';
 require('dotenv').config();
+
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
@@ -17,8 +19,6 @@ const Tweets = () => {
 	const [errormessage, setErrormessage] = React.useState();
 
 	
-
-
 	// useEffect(() => {
 	// 	const token = localStorage.getItem('token')
 		
@@ -39,6 +39,16 @@ const Tweets = () => {
 	// 	}
 
 	// },[])
+	useEffect(() => {
+		const params = new URLSearchParams()
+		if (handle) {
+		  params.append("handle", handle)
+		} else {
+		  params.delete("handle")
+		}
+		history.push({search: params.toString()})
+	  }, [handle, history])
+
 
 	async function GetTweets(event) {
 		event.preventDefault()
@@ -84,15 +94,13 @@ const Tweets = () => {
 				
 				setHandle(handle => data.tweets[0].TwitteruserFullName);
 				setUserName(userName => data.tweets[0].TwitteruserFullName);
-				setDisable(false);
-
-				ReactGA.event({
-					category: 'Tweets',
-					action: 'An AI Tweet Generated'
-				  });
-				
+				setDisable(false);	
 				
               }
+			  ReactGA.event({
+				category: 'Tweets',
+				action: 'An AI Tweet Generated'
+			  });
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
@@ -112,11 +120,11 @@ const Tweets = () => {
 	return (
 		<div className='tweetdiv'>
 		<div className='header'>
-			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
-			<h2 className='title'>Analyse user's Tweets, and write new Tweets in the same style</h2>
+			<h1 className='maintitle'>GALAXZ AI</h1>
+			<h2 className='mainsubtitle'>Analyse user's last few Tweets, and write new Tweets in the same style</h2>
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2><a target="_blank" href="/">See Examples here</a></h2>
+			 <h2 className='mainsubtitle'><a href="/">See Examples here</a></h2>
 			<form onSubmit={GetTweets}>
 				<input
 					type="text"
@@ -136,7 +144,7 @@ const Tweets = () => {
 			<br/>
 				{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			{/* {handle && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>} */}
-			{handle && <h4 className="card-title">{`@${handle} (${userName})`}</h4>}
+			{handle && <h4 className="mainsubtitle">{`@${handle} (${userName})`}</h4>}
 			</div>
 			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
 
@@ -146,7 +154,14 @@ const Tweets = () => {
 				onChange={setTweets}
 				/>
 			})}
-			
+			{handle &&  <h4 className='mainsubtitleads'><a target="_blank" href="mailto:learn@dictionaryv2.com">We CREATE a custom AI model on your/any account's Tweets, to generate high quality Tweets like you/them. Click to send us email</a></h4>}
+			{handle &&  <h2 className='mainsubtitleads'><a target="_blank" href="http://tweethunter.io/?via=vivek">To BUILD & MONETIZE YOUR TWITTER AUDIENCE... FAST. Click here.</a></h2>}
+			{handle &&  <h2 className='mainsubtitleads'><a target="_blank" href="https://twitter.com/galaxz_AI">Follow us on Twitter</a></h2>}
+		
+		<Helmet>
+          {handle && <title>{`Twitter @${handle}`}</title>}
+		  <meta charSet="utf-8" />
+		</Helmet>
 
 		</div>
 	)

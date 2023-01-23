@@ -3,7 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import Card from './Card'
 import ReactGA from 'react-ga';
-import NavBar from './Navbar'
+import NavBar from './Navbar';
+import { Helmet } from 'react-helmet';
+
+
 require('dotenv').config();
 
 
@@ -15,9 +18,10 @@ const Examples = () => {
 	const [tweets, setTweets] = useState([])
 	// const [twitterUserID, settwitterUserID] = useState('')
 	const [disable, setDisable] = React.useState(false);
-	const [handle, setHandle] = React.useState();
+	const [handle, setHandle] = React.useState("");
 	const [userName, setUserName] = React.useState();
 	const [errormessage, setErrormessage] = React.useState();
+	const history = useHistory()
 
 	// useEffect(() => {
 	// 	// const token = localStorage.getItem('token')
@@ -40,13 +44,23 @@ const Examples = () => {
 
 	// }), []
 
+	//update the url after every new handle
+	useEffect(() => {
+		const params = new URLSearchParams()
+		if (handle) {
+		  params.append("handle", handle)
+		} else {
+		  params.delete("handle")
+		}
+		history.push({search: params.toString()})
+	  }, [handle, history])
+
+
 	async function GetTweets(event) {
 		event.preventDefault()
 		setDisable(true);
 		setErrormessage(errormessage => "");
 		
-		
-
 		const req = await fetch(`${baseURL}/api/examples`, {
 			method: 'POST',
 			headers: {
@@ -86,16 +100,18 @@ const Examples = () => {
 
 				setTweets(prevArray => [...prevArray, obj])
 				
+            }
 				setHandle(handle => data.tweets.TwitteruserName);
+				
+				
 				setUserName(userName => data.tweets.AllAboutTweetsArray[0].TwitteruserFullName);
 				setDisable(false);
 				
-				
-				ReactGA.event({
-					category: 'Examples',
-					action: 'An Example Viewed'
-				  });
-              }
+
+			ReactGA.event({
+				category: 'Examples',
+				action: 'An Example Viewed'
+			  });
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
@@ -106,6 +122,10 @@ const Examples = () => {
 			  });
 			
 		}
+		
+		
+
+		  
 	}
 
 	
@@ -116,8 +136,8 @@ const Examples = () => {
 			{/* <NavBar sticky="top" /> */}
 		<div className='header'>
 			<br/>
-			<h1 className='title'><a target="_blank" href="https://twitter.com/galaxz_AI">GALAXZ AI</a></h1>
-			<h2 className='title'>Analyse user's last few Tweets, and write new Tweets in the same style</h2>
+			<h1 className='maintitle'>GALAXZ AI</h1>
+			<h2 className='mainsubtitle'>Analyse user's last few Tweets, and write new Tweets in the same style</h2>
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 			<form onSubmit={GetTweets}>
 			
@@ -125,13 +145,13 @@ const Examples = () => {
 				<input type="submit" className='button' value={disable ? `      Analysing...      ` : `  Show  Examples   ` } disabled={disable}/>
 				
 			</form>
-
-			{handle && <h5>Click again to see another example</h5>}
+			{disable && <h5>Analysis and new Tweet genaration may take few seconds..Please wait..</h5>}
+			{!disable && <h5>Click again to see another example</h5>}
 			{/* {!handle && <h6>Please wait..</h6>} */}
 			{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			
-			<h2 className='title1'><a target="_blank" href="/tweets">Analyse other Twitter accounts here</a></h2>
-			{handle && <h4 className="card-title">{`@${handle} (${userName})`}</h4>}
+			<h2 className='mainsubtitle'><a href="/tweets">Analyse other Twitter accounts here</a></h2>
+			{handle && <h4 className="mainsubtitle">{`@${handle} (${userName})`}</h4>}
 			
 		</div>
 			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
@@ -143,8 +163,15 @@ const Examples = () => {
 				onChange={setTweets}
 				/>
 			})}
-			
+			{handle &&  <h4 className='mainsubtitleads'><a target="_blank" href="mailto:learn@dictionaryv2.com">We CREATE a custom AI model on your/any account's Tweets, to generate high quality Tweets like you/them. Click to send us email</a></h4>}
+			{handle &&  <h2 className='mainsubtitleads'><a target="_blank" href="http://tweethunter.io/?via=vivek">To BUILD & MONETIZE YOUR TWITTER AUDIENCE... FAST. Click here.</a></h2>}
+			{handle &&  <h2 className='mainsubtitleads'><a target="_blank" href="https://twitter.com/galaxz_AI">Follow us on Twitter</a></h2>}
 
+		<Helmet>
+          {handle && <title>{`Twitter @${handle}`}</title>}
+		  <meta charSet="utf-8" />
+		 </Helmet>
+		 
 		</div>
 	)
 }
