@@ -5,6 +5,7 @@ body {
     sans-serif;
 
   max-width: 100%;
+  /* transform: scale(0.9); */
   overflow-x: hidden;
     -webkit-box-sizing: border-box;
        -moz-box-sizing: border-box;
@@ -40,7 +41,7 @@ code {
 }
 
 .header{
-  width: 90%;
+  width: 80%;
   height: 100%;
   background-color: #ffffff;
   border: 1px solid #ccc;
@@ -55,21 +56,21 @@ code {
 
 
 .title {
-  font-size: 1.5em;
+  font-size: 1.3em;
   text-align: center;
   color: #000033;
   font-weight: 700;
   width: 80%;
 }
 .maintitle {
-  font-size: 1.6em;
+  font-size: 1.4em;
   text-align: center;
   color: #003366;
   font-weight: 800;
   width: 80%;
 }
 .mainsubtitle{
-  font-size: 1.4em;
+  font-size: 1.2em;
   text-align: center;
   color: #003366;
   font-weight: 700;
@@ -85,8 +86,8 @@ code {
 
 
 .title1 {
-  margin-top: 30px;
-  font-size: 1.5em;
+  margin-top: 28px;
+  font-size: 1.2em;
   text-align: center;
   color: #000033;
 }
@@ -98,11 +99,12 @@ code {
   /* display: flex; */
   /* flex-direction: column; */
   align-items: left;
-  margin: 5%;
+  margin: 3%;
 }
 
 .card{
-  width: 90%;
+  width: 80%;
+  /* display: flex; */
   height: 100%;
   background-color: #ffffff;
   border: 1px solid #ccc;
@@ -112,39 +114,95 @@ code {
   box-shadow: 0 0 10px #ccc;
 }
 
-.admincard{
+.admincardmain{
+  width: fit-content;
   width: 90%;
-  height: 30%;
+  display: flex;
+  flex-wrap: wrap;
+  height:100%;
+  background-color: #ffffff;
+  /* border: 1px solid #ccc; */
+  border-radius: 5px;
+  padding: 5px;
+  margin: 5px;
+
+  /* box-shadow: 0 0 10px #ccc; */
+}
+
+.admincard{
+
+  width: min-content;
   background-color: #ffffff;
   border: 1px solid #ccc;
   border-radius: 5px;
-
-  padding: 0px;
+  padding: 20px;
+  line-height: 10px;
+  vertical-align: middle;
+  align-items: center;
+  text-align: center;
   margin: 3px;
   box-shadow: 0 0 10px #ccc;
+  /* height: 30px; */
+  height: auto;
+
 }
-.admincard-body{
-  /* display: flex; */
-  flex-direction: row;
-  align-items: left;
-  margin: 5%;
+
+.admincardselected{
+  width: min-content;
+  background-color: #009dff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 20px;
+  line-height: 10px;
+  vertical-align: middle;
+  align-items: center;
+  text-align: center;
+  margin: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 10px #ccc;
+  /* height: 30px; */
+  height: auto;
+}
+
+.admincard:hover {
+  background: #fdfdfd;
+  box-shadow: 0px 2px 10px 5px #d7d7d7;
+  color: #000;
+  cursor: pointer;
+}
+
+.admincardselected:hover {
+  background: #009dff;
+  box-shadow: 0px 2px 10px 5px #d7d7d7;
+  color: #000;
+  cursor: pointer;
+}
+
+.divselected{
+  background: #7c1515;
+  box-shadow: 0px 2px 10px 5px #d7d7d7;
+  color: #000;
+  cursor: pointer;
 }
 
 .card-title{
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #000033;
 }
 
 .card-text{
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 550;
   color: #000000;
 }
 
+.Tweetlink{
+  font-size: 0.9rem;
+}
 
 .card-text > span {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 550;
   color: #000000;
   margin-bottom: 0%;
@@ -160,7 +218,7 @@ code {
 
 .userIdTextBox{
   text-indent:20px;
-  font-size: 18px;
+  font-size: 14px;
   width: 95%;
   height: 40px;
   border: 1px solid #ccc;
@@ -170,7 +228,18 @@ code {
   align-self: center;
   margin-top: 5px;
 }
-
+.tagTextBox{
+  text-indent:20px;
+  font-size: 14px;
+  width: 19%;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 5px;
+  margin-bottom: 10px;
+  align-self: center;
+  margin-top: 5px;
+}
 
 
 
@@ -178,7 +247,7 @@ code {
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 15px;
   letter-spacing: 4px;
   position: relative;
   background-color: #009dff;
@@ -237,17 +306,22 @@ hr {
 
 .errormessage{
   color: red;
-  font-size: 25px;
+  font-size: 23px;
   margin-top: 5px;
 }
 
+.errormessagesmall{
+  color: red;
+  font-size: 15px;
+  margin-top: 5px;
+}
 /* COPY BUTTON */
 
 .copybutton {
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 13px;
   letter-spacing: 4px;
   position: relative;
   background-color: #009dff;
@@ -291,6 +365,11 @@ hr {
 }
 
 .copybutton:focus { outline:0; }
+.copybutton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #707070;
+}
 
 /* COPY BUTTON END */
 
@@ -337,6 +416,10 @@ a:active {
 
   }
 
+
+  .card{
+    width: 90%;
+  }
   .header{
     width: 90%;
     height: 100%;
@@ -351,14 +434,20 @@ a:active {
     box-shadow: 0 0 10px #ccc;
   }
   
-
-  .title {
+  .maintitle{
     font-size: 1.2em;
+  }
+
+  .mainsubtitle{
+    font-size: 1.0em;
+  }
+  .title {
+    font-size: 1.1em;
     font-weight: 700;
     width: 80%;
   }
   .title1 {
-    font-size: 1.2em;
+    font-size: 1.1em;
     font-weight: 700;
     width: 80%;
     color: #333;
@@ -375,43 +464,46 @@ a:active {
   }
  
   .button {
-    width: 90%;
+    width: 100%;
     height: auto;
     padding: 15px;
     font-size: 15px;
   }
 
   .card-title{
-    font-size: 1.1rem;
+    font-size: 1.0rem;
     font-weight: 600;
   }
   
   .card-text{
-    font-size: 1.0rem;
+    font-size: 0.9rem;
     font-weight: 550;
   }
   
   
   .card-text > span {
-    font-size: 1.0rem;
+    font-size: 0.9rem;
     font-weight: 550;
 
   }
   .copybutton {
-    width: 60%;
+    width: 70%;
   }
 
-
+  .Tweetlink{
+    font-size: 0.7rem;
+  }
 
   
-  .userIdTextBox
+  .userIdTextBox .tagTextBox
   {
     width: 80%;
   } 
 
+  .admincard{
+    height: auto;  
+  }
 }
-
-
 
 
 

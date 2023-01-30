@@ -4,12 +4,13 @@ import { useHistory } from 'react-router-dom'
 import Card from './Card'
 import ReactGA from 'react-ga';
 import { Helmet } from 'react-helmet';
+import AdminCard from './AdminCard'
 require('dotenv').config();
 
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
-const Tweets = () => {
+const Curate = () => {
 	const history = useHistory()
 	const [tweets, setTweets] = useState([])
 	const [twitterUserID, settwitterUserID] = useState('')
@@ -17,29 +18,12 @@ const Tweets = () => {
 	const [handle, setHandle] = React.useState();
 	const [userName, setUserName] = React.useState();
 	const [errormessage, setErrormessage] = React.useState();
-
-	
-	// useEffect(() => {
-	// 	const token = localStorage.getItem('token')
-		
-	// 	// https://mudit.hashnode.dev/5-things-you-should-know-about-useeffect
-	// 	if (token) {
-	// 		const user = jwt.decode(token)
-	// 		if (!user) {
-	// 			console.log('no user')
-	// 			localStorage.removeItem('token')
-	// 			history.replace('/login')
-				
-	// 		} else {
-	// 			// populateQuote()do something //cleanup function
-	// 			// console.log('user is ', user)
-	// 		}
-	// 	}else{
-	// 		history.replace('/login')
-	// 	}
+	const [admin, setAdmin] = useState([])
+	const [disable1, setDisable1] = React.useState(false);
 
 	// },[])
 	useEffect(() => {
+		Admin();
 		const params = new URLSearchParams()
 		if (handle) {
 		  params.append("h", handle)
@@ -49,6 +33,36 @@ const Tweets = () => {
 		history.push({search: params.toString()})
 	  }, [handle, history])
 
+	async function Admin(event) {
+		
+		// setAdmin(admin => []);
+		// setDisable1(false);
+
+		const req = await fetch(`${baseURL}/api/admin`, {
+
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-access-token': localStorage.getItem('token'),
+			},
+			body: JSON.stringify({
+				// tweeterUserHadleToPullTweets: twitterUserID,
+			}),
+
+		})
+
+		const data = await req.json()
+		if (data.status === 'ok') {
+
+			setAdmin(admin => []); //clear them first
+
+		for (let i=0;i<data.AdminArray.length;i++){ 
+		
+			setAdmin(prevArray => [...prevArray, data.AdminArray[i]])
+
+		}
+		setDisable1(true);
+	} }   
 
 	async function GetTweets(event) {
 		event.preventDefault()
@@ -58,7 +72,7 @@ const Tweets = () => {
 		setHandle(handle => "");
 		setErrormessage(errormessage => "");
 
-		const req = await fetch(`${baseURL}/api/tweets`, {
+		const req = await fetch(`${baseURL}/api/curate`, {
 
 			method: 'POST',
 			headers: {
@@ -102,8 +116,8 @@ const Tweets = () => {
 				
               }
 			  ReactGA.event({
-				category: 'Pull Tweets',
-				action: 'Tweets were pulled'
+				category: 'Curate',
+				action: 'Curate page used'
 			  });
 		} 
 		else if(data.status === 'error'){
@@ -115,26 +129,36 @@ const Tweets = () => {
 			  });
 		}
 	}
-
-	const handleClick = event => {
-
-		console.log('button disabled');
+	const chooseHandle = (twitterUserID) => {
+		settwitterUserID(twitterUserID); // id passed back from chile component
 	  };
 
 	return (
 		<div className='tweetdiv'>
 		<div className='header'>
-			<h1 className='maintitle'>GALAXZ AI - PULL TWEETS</h1>
+			<h1 className='maintitle'>GALAXZ AI - ADMIN CURATE</h1>
 			{/* <h2 className='mainsubtitle'>Analyse user's last few Tweets, and write new Tweets in the same style</h2> */}
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2 className='mainsubtitle'><a href="/curate">Curate Tweets here</a></h2>
+			 <h2 className='mainsubtitle'><a href="/tweets">Pull Tweets here</a></h2>
+			 
+			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
+
+			 <div className='admincardmain'>
+			 {admin.map((admin,index,) => {
+				return <AdminCard 
+				admin={admin}  key={index} chooseHandle={chooseHandle}
+				// onChange={setAdmin}
+				/>
+			})}
+			</div>
+			
 			<form onSubmit={GetTweets}>
 				<input
 					type="text"
 					className='userIdTextBox'
 					maxLength={70}
-					required
+					// required
 					placeholder="Twitter User handle without @"
 					onChange={(e) => settwitterUserID(e.target.value)}
 				/>
@@ -171,5 +195,5 @@ const Tweets = () => {
 	)
 }
 
-export default Tweets
+export default Curate
 

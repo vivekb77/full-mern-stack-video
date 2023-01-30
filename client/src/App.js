@@ -3,6 +3,8 @@ import { BrowserRouter, Route } from 'react-router-dom'
 // import Login from './pages/Login'
 // import Register from './pages/Register'
 import Tweets from './pages/Tweets'
+import AITweets from './pages/AITweets'
+import Curate from './pages/Curate'
 import Examples from './pages/Examples'
 import Admin from './pages/Admin'
 
@@ -20,8 +22,11 @@ const App = () => {
 				{/* <Route path="/login" exact component={Login} /> */}
 				{/* <Route path="/register" exact component={Register} /> */}
 				<Route path="/tweets" exact component={Tweets} />
-				<Route path="/admin" exact component={Admin} />
-				<Route path="/" exact component={Examples} />
+				<Route path="/" exact component={AITweets} />
+				<Route path="/curate" exact component={Curate} />
+
+				{/* <Route path="/admin" exact component={Admin} /> */}
+				{/* <Route path="/examples" exact component={Examples} /> */}
 			</BrowserRouter>
 		</div>
 	)

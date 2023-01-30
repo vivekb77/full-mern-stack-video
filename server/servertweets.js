@@ -2,8 +2,25 @@
 
 
 
+app.post('/api/admin', async (req, res) => {
 
+	try {
+		const Analyse = await TweetData.find({
+			Email: 'generic@email.com'
+		})
+		AdminArray = []
+		for (let i = 0; i < Analyse.length; i++) {
+			// console.log(Analyse[i].TwitteruserName)
+			AdminArray.push(Analyse[i].TwitteruserName)
 
+		}
+
+		return res.json({ status: 'ok', AdminArray: AdminArray })
+
+	} catch (error) {
+		res.json({ status: 'error', error: 'Admin error occured' })
+	}
+})
 
 
 

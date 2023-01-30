@@ -48,9 +48,9 @@ const Examples = () => {
 	useEffect(() => {
 		const params = new URLSearchParams()
 		if (handle) {
-		  params.append("handle", handle)
+		  params.append("h", handle)
 		} else {
-		  params.delete("handle")
+		  params.delete("h")
 		}
 		history.push({search: params.toString()})
 	  }, [handle, history])
@@ -145,8 +145,8 @@ const Examples = () => {
 				<input type="submit" className='button' value={disable ? `      Analysing...      ` : `  Show  Examples   ` } disabled={disable}/>
 				
 			</form>
-			{disable && <h5>Analysis and new Tweet genaration may take few seconds..Please wait..</h5>}
-			{!disable && <h5>Click again to see another example</h5>}
+			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
+			{!disable && <h6>Click again to see another example</h6>}
 			{/* {!handle && <h6>Please wait..</h6>} */}
 			{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			
@@ -168,7 +168,7 @@ const Examples = () => {
 			{handle &&  <h2 className='mainsubtitleads'><a target="_blank" href="https://twitter.com/galaxz_AI">Follow us on Twitter</a></h2>}
 
 		<Helmet>
-          {handle && <title>{`Twitter @${handle}`}</title>}
+          {handle && <title>{`GALAXZAI @${handle}`}</title>}
 		  <meta charSet="utf-8" />
 		 </Helmet>
 		 

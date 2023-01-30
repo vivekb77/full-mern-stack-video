@@ -1,45 +1,34 @@
 import React, { useEffect, useState } from 'react'
 import jwt from 'jsonwebtoken'
 import { useHistory } from 'react-router-dom'
-import Card from './Card'
+import Card from './AICard'
+import AdminCard from './AdminCard'
 import ReactGA from 'react-ga';
 import { Helmet } from 'react-helmet';
 require('dotenv').config();
 
+ReactGA.event({
+	category: 'AI Tweets',
+	action: 'AI Tweets Page Viewed'
+  });
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
-const Tweets = () => {
+const AITweets = () => {
 	const history = useHistory()
 	const [tweets, setTweets] = useState([])
 	const [twitterUserID, settwitterUserID] = useState('')
 	const [disable, setDisable] = React.useState(false);
+	const [disable1, setDisable1] = React.useState(false);
 	const [handle, setHandle] = React.useState();
 	const [userName, setUserName] = React.useState();
 	const [errormessage, setErrormessage] = React.useState();
 
-	
-	// useEffect(() => {
-	// 	const token = localStorage.getItem('token')
-		
-	// 	// https://mudit.hashnode.dev/5-things-you-should-know-about-useeffect
-	// 	if (token) {
-	// 		const user = jwt.decode(token)
-	// 		if (!user) {
-	// 			console.log('no user')
-	// 			localStorage.removeItem('token')
-	// 			history.replace('/login')
-				
-	// 		} else {
-	// 			// populateQuote()do something //cleanup function
-	// 			// console.log('user is ', user)
-	// 		}
-	// 	}else{
-	// 		history.replace('/login')
-	// 	}
+	const [admin, setAdmin] = useState([])
 
-	// },[])
+	
 	useEffect(() => {
+		Admin();
 		const params = new URLSearchParams()
 		if (handle) {
 		  params.append("h", handle)
@@ -50,6 +39,38 @@ const Tweets = () => {
 	  }, [handle, history])
 
 
+	
+	async function Admin(event) {
+		
+		// setAdmin(admin => []);
+		// setDisable1(false);
+
+		const req = await fetch(`${baseURL}/api/admin`, {
+
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'x-access-token': localStorage.getItem('token'),
+			},
+			body: JSON.stringify({
+				// tweeterUserHadleToPullTweets: twitterUserID,
+			}),
+
+		})
+
+		const data = await req.json()
+		if (data.status === 'ok') {
+
+			setAdmin(admin => []); //clear them first
+
+		for (let i=0;i<data.AdminArray.length;i++){ 
+		
+			setAdmin(prevArray => [...prevArray, data.AdminArray[i]])
+
+		}
+		setDisable1(true);
+	} }  
+
 	async function GetTweets(event) {
 		event.preventDefault()
 		setDisable(true);
@@ -57,8 +78,10 @@ const Tweets = () => {
 		setUserName(userName => "");
 		setHandle(handle => "");
 		setErrormessage(errormessage => "");
+		settwitterUserID(twitterUserID => "");
+		
 
-		const req = await fetch(`${baseURL}/api/tweets`, {
+		const req = await fetch(`${baseURL}/api/ShowTweets`, {
 
 			method: 'POST',
 			headers: {
@@ -73,7 +96,7 @@ const Tweets = () => {
 
 		const data = await req.json()
 		if (data.status === 'ok') {
-			// console.log('data is ', data)
+
 			for (let i=0;i<data.tweets.length;i++){ 
 
 				const obj = {
@@ -87,7 +110,7 @@ const Tweets = () => {
 					reply_count: data.tweets[i].reply_count,
 					quote_count: data.tweets[i].quote_count,
 					retweet_count: data.tweets[i].retweet_count,
-					tag: data.tweets[i].tag,
+					curationstatus: data.tweets[i].curationstatus,
 					CreatedDate: data.tweets[i].CreatedDate,
 
 					
@@ -102,55 +125,74 @@ const Tweets = () => {
 				
               }
 			  ReactGA.event({
-				category: 'Pull Tweets',
-				action: 'Tweets were pulled'
+				category: 'AI Tweets',
+				action: 'An AI Tweet Generated'
 			  });
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
 			setErrormessage(userName => data.error);
+			
 			ReactGA.exception({
-				description: 'An error ocurred on Tweets page',
+				description: 'An error ocurred on AI Tweets page',
 				fatal: true
 			  });
 		}
 	}
 
-	const handleClick = event => {
-
-		console.log('button disabled');
+	const chooseHandle = (twitterUserID) => {
+		settwitterUserID(twitterUserID); // id passed back from chile component
 	  };
+
 
 	return (
 		<div className='tweetdiv'>
 		<div className='header'>
-			<h1 className='maintitle'>GALAXZ AI - PULL TWEETS</h1>
-			{/* <h2 className='mainsubtitle'>Analyse user's last few Tweets, and write new Tweets in the same style</h2> */}
+			<h1 className='maintitle'>GALAXZ AI</h1>
+			<h2 className='mainsubtitle'>Analyse user's last few Tweets, and AI writes new Tweets in the same style for you</h2>
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2 className='mainsubtitle'><a href="/curate">Curate Tweets here</a></h2>
+			 {/* <h2 className='mainsubtitle'><a href="/">See Examples here</a></h2> */}
+			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
+
+			<div className='admincardmain'>
+			 {admin.map((admin,index,) => {
+				return <AdminCard 
+				admin={admin}  key={index} chooseHandle={chooseHandle}
+				// onChange={setAdmin}
+				/>
+			})}
+			</div>
+
+
 			<form onSubmit={GetTweets}>
-				<input
+				{/* <input
 					type="text"
 					className='userIdTextBox'
 					maxLength={70}
 					required
 					placeholder="Twitter User handle without @"
 					onChange={(e) => settwitterUserID(e.target.value)}
-				/>
-				
-				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={disable}/>
+				/> */}
+				 <input type="hidden" value={settwitterUserID} />
+
+				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={!twitterUserID}/>
 				
 			</form>
 			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
 			<br/>
 			{disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>}
 			<br/>
-				{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
-			{/* {handle && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>} */}
+
 			{handle && <h4 className="mainsubtitle">{`@${handle} (${userName})`}</h4>}
+			
 			</div>
 			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
+
+			
+
+
+
 
 			{tweets.map((tweet,index) => {
 				return <Card 
@@ -171,5 +213,5 @@ const Tweets = () => {
 	)
 }
 
-export default Tweets
+export default AITweets
 

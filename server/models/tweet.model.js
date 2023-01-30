@@ -3,14 +3,22 @@ const mongoose = require('mongoose')
 //schema validation for user data
 const TweetData = new mongoose.Schema(
 	{
-		Email: { type: String, required: false },
+		// _id: { type: String, required: true },
 		TweeterUserIDtopullTweets: { type: String, required: false },
-		AllAboutTweetsArray: { type: Array, required: false }, 
 		TwitteruserName: { type: String, required: false },
-		TwitteruserFullName: { type: String, required: false },
-		total_tokens_used_forrun: { type: Number, required: false },
-		CreatedDate: { type: Date, required: true }
-		
+		TwitteruserFullName: { type: String, required: false }, 
+		CreatedDate: { type: Date, required: false },
+		tweet: { type: String, required: false },
+		tweetID: { type: String, required: false },
+		retweet_count: { type: Number, required: false },
+		reply_count: { type: Number, required: false },
+		like_count: { type: Number, required: false },
+		quote_count: { type: Number, required: false },
+		impression_count: { type: Number, required: false },
+		curationstatus: { type: String, required: false },
+		total_tokens: { type: Number, required: false },
+		likesTOviewsRatio: { type: Number, required: false },
+		tag: { type: String, required: false },
 	},
 	{ collection: 'TweetData' }
 )
