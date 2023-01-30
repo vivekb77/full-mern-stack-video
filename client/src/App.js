@@ -5,10 +5,12 @@ import { BrowserRouter, Route } from 'react-router-dom'
 import Tweets from './pages/Tweets'
 import AITweets from './pages/AITweets'
 import Curate from './pages/Curate'
+import Topic from './pages/Topic'
 import Examples from './pages/Examples'
 import Admin from './pages/Admin'
 
 import ReactGA from 'react-ga';
+
 const MEASUREMENT_ID = "G-N2T7DHCCBJ"; // YOUR_OWN_TRACKING_ID
 const TRACKIING_ID = "UA-250139782-1";
 ReactGA.initialize(TRACKIING_ID);
@@ -23,6 +25,7 @@ const App = () => {
 				{/* <Route path="/register" exact component={Register} /> */}
 				<Route path="/tweets" exact component={Tweets} />
 				<Route path="/" exact component={AITweets} />
+				<Route path="/topic" exact component={Topic} />
 				<Route path="/curate" exact component={Curate} />
 
 				{/* <Route path="/admin" exact component={Admin} /> */}

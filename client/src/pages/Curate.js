@@ -5,6 +5,7 @@ import Card from './Card'
 import ReactGA from 'react-ga';
 import { Helmet } from 'react-helmet';
 import AdminCard from './AdminCard'
+import TopicCard from './TopicCard'
 require('dotenv').config();
 
 
@@ -14,12 +15,17 @@ const Curate = () => {
 	const history = useHistory()
 	const [tweets, setTweets] = useState([])
 	const [twitterUserID, settwitterUserID] = useState('')
-	const [disable, setDisable] = React.useState(false);
+	const [disable, setDisable] = React.useState(true);
 	const [handle, setHandle] = React.useState();
 	const [userName, setUserName] = React.useState();
 	const [errormessage, setErrormessage] = React.useState();
-	const [admin, setAdmin] = useState([])
-	const [disable1, setDisable1] = React.useState(false);
+	const [admin, setAdmin] = useState([]);
+	const [topic, setTopic1] = useState([]);
+	const [tagtopullTweets, setTagtopullTweets] = useState('')
+	const [disable1, setDisable1] = React.useState(true);
+	const [buttondisable, setButtondisable] = React.useState(false);
+	const [buttondisable1, setButtondisable1] = React.useState(false);
+	const [tokens, setTokens] = useState([])
 
 	// },[])
 	useEffect(() => {
@@ -36,7 +42,7 @@ const Curate = () => {
 	async function Admin(event) {
 		
 		// setAdmin(admin => []);
-		// setDisable1(false);
+
 
 		const req = await fetch(`${baseURL}/api/admin`, {
 
@@ -55,18 +61,29 @@ const Curate = () => {
 		if (data.status === 'ok') {
 
 			setAdmin(admin => []); //clear them first
+			setTopic1(topic => []); //clear them first
+			setTokens(tokens => data.tokensused);
 
 		for (let i=0;i<data.AdminArray.length;i++){ 
 		
 			setAdmin(prevArray => [...prevArray, data.AdminArray[i]])
-
+			
 		}
+
+		for (let z=0;z<data.TopicArray.length;z++){ 
+		
+			setTopic1(prevArray => [...prevArray, data.TopicArray[z]])
+			
+		}
+		
+		setDisable(true);
 		setDisable1(true);
 	} }   
 
+
 	async function GetTweets(event) {
 		event.preventDefault()
-		setDisable(true);
+		setButtondisable(true);
 		setTweets(tweets => []);
 		setUserName(userName => "");
 		setHandle(handle => "");
@@ -81,6 +98,7 @@ const Curate = () => {
 			},
 			body: JSON.stringify({
 				tweeterUserHadleToPullTweets: twitterUserID,
+				topicToPullTweets:"null"
 			}),
 
 		})
@@ -109,10 +127,10 @@ const Curate = () => {
 				}
 
 				setTweets(prevArray => [...prevArray, obj])
-				
+				setButtondisable(false);
 				setHandle(handle => data.tweets[0].TwitteruserName);
 				setUserName(userName => data.tweets[0].TwitteruserFullName);
-				setDisable(false);	
+
 				
               }
 			  ReactGA.event({
@@ -129,11 +147,85 @@ const Curate = () => {
 			  });
 		}
 	}
-	const chooseHandle = (twitterUserID) => {
-		settwitterUserID(twitterUserID); // id passed back from chile component
-	  };
+	
 
-	return (
+	
+	async function GetTopicTweets(event) {
+	event.preventDefault()
+	setButtondisable1(true);
+	setTweets(tweets => []);
+	setHandle(handle => "");
+	setErrormessage(errormessage => "");
+
+	const req = await fetch(`${baseURL}/api/curate`, {
+
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'x-access-token': localStorage.getItem('token'),
+		},
+		body: JSON.stringify({
+			tweeterUserHadleToPullTweets: "null",
+			topicToPullTweets:tagtopullTweets
+		}),
+
+	})
+
+	const data = await req.json()
+	if (data.status === 'ok') {
+		// console.log('data is ', data)
+		for (let i=0;i<data.tweets.length;i++){ 
+
+			const obj = {
+				dbid:data.tweets[i]._id,
+				tweetID: data.tweets[i].tweetID,
+				tweet: data.tweets[i].tweet,
+				TwitteruserFullName: data.tweets[i].TwitteruserFullName,
+				TwitteruserName: data.tweets[i].TwitteruserName,
+				impression_count: data.tweets[i].impression_count,
+				like_count: data.tweets[i].like_count,
+				reply_count: data.tweets[i].reply_count,
+				quote_count: data.tweets[i].quote_count,
+				retweet_count: data.tweets[i].retweet_count,
+				tag: data.tweets[i].tag,
+				CreatedDate: data.tweets[i].CreatedDate,
+
+				
+				
+			}
+
+			setTweets(prevArray => [...prevArray, obj])
+			setButtondisable1(false);
+			setHandle(handle => data.tweets[0].tag);
+			setUserName(userName => data.tweets[0].tag);
+
+			
+			}
+			ReactGA.event({
+			category: 'Curate',
+			action: 'Curate page used'
+			});
+	} 
+	else if(data.status === 'error'){
+		setDisable(false);
+		setErrormessage(userName => data.error);
+		ReactGA.exception({
+			description: 'An error ocurred on Tweets page',
+			fatal: true
+			});
+	}
+	}
+
+	const chooseTopic = (topictopull) => {
+		setDisable1(false);
+		setTagtopullTweets(topictopull); // id passed back from chile component
+	};
+	const chooseHandle = (twitterUserID) => {
+		setDisable(false);
+		settwitterUserID(twitterUserID); // id passed back from chile component
+	};
+	
+	  return (
 		<div className='tweetdiv'>
 		<div className='header'>
 			<h1 className='maintitle'>GALAXZ AI - ADMIN CURATE</h1>
@@ -143,6 +235,7 @@ const Curate = () => {
 			 <h2 className='mainsubtitle'><a href="/tweets">Pull Tweets here</a></h2>
 			 
 			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
+			{tokens && <h6>Total Tokens used - {tokens}</h6>}
 
 			 <div className='admincardmain'>
 			 {admin.map((admin,index,) => {
@@ -152,23 +245,43 @@ const Curate = () => {
 				/>
 			})}
 			</div>
+
+
+			
+
 			
 			<form onSubmit={GetTweets}>
-				<input
+				{/* <input
 					type="text"
 					className='userIdTextBox'
 					maxLength={70}
 					// required
 					placeholder="Twitter User handle without @"
 					onChange={(e) => settwitterUserID(e.target.value)}
-				/>
+				/> */}
 				
-				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={disable}/>
+				<input type="submit" className='button' value={buttondisable ? `Getting...` : `Get User Tweets` } disabled={disable}/>
 				
 			</form>
-			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
+		<br/>
+			<div className='admincardmain'>
+			 {topic.map((topic,index,) => {
+				return <TopicCard 
+				topic={topic}  key={index} chooseTopic={chooseTopic}
+				// onChange={setAdmin}
+				/>
+			})}
+			</div>
+
+			<form onSubmit={GetTopicTweets}>
+				
+				<input type="submit" className='button' value={buttondisable1 ? `Getting...` : `Get Topic Tweets` } disabled={disable1}/>
+				
+			</form>
+
+			{/* {disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>} */}
 			<br/>
-			{disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>}
+			{/* {disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>} */}
 			<br/>
 				{/* <h4>Need a similar report (on 500 Tweets) for any Twitter account? <a href="mailto:learn@dictionaryv2.com">Email us at learn@dictionaryv2.com</a></h4> */}
 			{/* {handle && <h6><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h6>} */}

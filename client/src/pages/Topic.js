@@ -14,7 +14,7 @@ ReactGA.event({
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
-const AITweets = () => {
+const Topic = () => {
 	const history = useHistory()
 	const [tweets, setTweets] = useState([])
 	const [twitterUserID, settwitterUserID] = useState('')
@@ -63,9 +63,9 @@ const AITweets = () => {
 
 			setAdmin(admin => []); //clear them first
 
-		for (let i=0;i<data.AdminArray.length;i++){ 
+		for (let i=0;i<data.TopicArray.length;i++){ 
 		
-			setAdmin(prevArray => [...prevArray, data.AdminArray[i]])
+			setAdmin(prevArray => [...prevArray, data.TopicArray[i]])
 
 		}
 		setDisable1(true);
@@ -81,7 +81,7 @@ const AITweets = () => {
 		settwitterUserID(twitterUserID => "");
 		
 
-		const req = await fetch(`${baseURL}/api/ShowTweets`, {
+		const req = await fetch(`${baseURL}/api/GetTweetsOnTopic`, {
 
 			method: 'POST',
 			headers: {
@@ -89,7 +89,7 @@ const AITweets = () => {
 				'x-access-token': localStorage.getItem('token'),
 			},
 			body: JSON.stringify({
-				tweeterUserHadleToPullTweets: twitterUserID,
+				topictopulltweets: twitterUserID,
 			}),
 
 		})
@@ -119,8 +119,8 @@ const AITweets = () => {
 
 				setTweets(prevArray => [...prevArray, obj])
 				
-				setHandle(handle => data.tweets[0].TwitteruserName);
-				setUserName(userName => data.tweets[0].TwitteruserFullName);
+				setHandle(handle => data.tweets[0].tag);
+				setUserName(userName => data.tweets[0].tag);
 				setDisable(false);	
 				
               }
@@ -153,7 +153,7 @@ const AITweets = () => {
 			<h3 className='mainsubtitle'>Looking at great content inspires you to write better content, faster.</h3>
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2 className='mainsubtitle'><a className='mainsubtitlelink' href="/topic">Search Twitter Topics here</a></h2>
+			 <h2 className='mainsubtitle'><a className='mainsubtitlelink' href="/">Search Twitter Users here</a></h2>
 			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
 
 			<div className='admincardmain'>
@@ -175,7 +175,6 @@ const AITweets = () => {
 					placeholder="Twitter User handle without @"
 					onChange={(e) => settwitterUserID(e.target.value)}
 				/> */}
-				 <input type="hidden" value={settwitterUserID} />
 
 				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={!twitterUserID}/>
 				
@@ -185,15 +184,9 @@ const AITweets = () => {
 			{disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>}
 			<br/>
 
-			{handle && <h4 className="mainsubtitle">{`@${handle} (${userName})`}</h4>}
+			{handle && <h4 className="mainsubtitle">{`#${handle}`}</h4>}
 			
 			</div>
-			{/* {handle && <h6>Sorted by Likes/Views%</h6>} */}
-
-			
-
-
-
 
 			{tweets.map((tweet,index) => {
 				return <Card 
@@ -214,5 +207,5 @@ const AITweets = () => {
 	)
 }
 
-export default AITweets
+export default Topic
 

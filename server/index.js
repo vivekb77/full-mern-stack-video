@@ -79,22 +79,32 @@ mongoose.connect(`${MONGO_URL}`)
 
 app.post('/api/admin', async (req, res) => {
 
+	let tokensused = 0;
+
 	try {
 		const Analyse = await TweetData.find({
 			curationstatus: 'notcurated'
 		})
 		AdminArray = []
+		TopicArray = []
 		for (let i = 0; i < Analyse.length; i++) {
 			// console.log(Analyse[i].TwitteruserName)
 			AdminArray.push(Analyse[i].TwitteruserName)
+			if(Analyse[i].tag != 'tagnotaddedyet'){
+				TopicArray.push(Analyse[i].tag)
+			}
+			tokensused = tokensused + Analyse[i].total_tokens;
 			
 		}
+
 		AdminArray = [...new Set(AdminArray)];  //remove duplicates
+		TopicArray = [...new Set(TopicArray)];  //remove duplicates
 		// const AdminArray1 = AdminArray.sort((a, b) => 0.5 - Math.random()); //shuffle array
 
-		return res.json({ status: 'ok', AdminArray: AdminArray })
+		return res.json({ status: 'ok', AdminArray: AdminArray, TopicArray:TopicArray, tokensused:tokensused })
 
 	} catch (error) {
+		console.log(error)
 		res.json({ status: 'error', error: 'Admin error occured' })
 	}
 })
@@ -159,16 +169,15 @@ app.post('/api/ShowTweets', async (req, res) => {
 })
 // PULL TWEET to show user END
 
-// CURATE TWEET  START
-app.post('/api/curate', async (req, res) => {
+// PULL TWEET  on topic to show user START
+app.post('/api/GetTweetsOnTopic', async (req, res) => {
 
-	let tweeterUserHadleToPullTweets = req.body.tweeterUserHadleToPullTweets.trim();
+	let topictopulltweets = req.body.topictopulltweets.trim();
 	
 	const AITweets = await TweetData.find({
-
 		//case insensitive search on handle
-		TwitteruserName: { '$regex':tweeterUserHadleToPullTweets , '$options' : 'i'} ,
-		curationstatus:"notcurated"
+		tag: { '$regex':topictopulltweets , '$options' : 'i'} 
+
 	})
 	
 	if(AITweets.length > 0){
@@ -176,9 +185,61 @@ app.post('/api/curate', async (req, res) => {
 		AITweets.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
 	return res.json({ status: 'ok', tweets: AITweets })
 	}else{
-		return res.json({ status: 'error', error: 'No Tweets found for user' })
+		return res.json({ status: 'error', error: 'No Tweets found for topic' })
 	}
 
+})
+// PULL TWEET on topic to show user END
+
+
+// CURATE TWEET  START
+app.post('/api/curate', async (req, res) => {
+
+	let tweeterUserHadleToPullTweets = req.body.tweeterUserHadleToPullTweets.trim();
+	let topicToPullTweets = req.body.topicToPullTweets.trim();
+
+	
+	
+	if(topicToPullTweets === "null"){
+
+		const AITweets = await TweetData.find({
+
+			//case insensitive search on handle
+			TwitteruserName: { '$regex':tweeterUserHadleToPullTweets , '$options' : 'i'} ,
+			curationstatus:"notcurated"
+		})
+
+		if(AITweets.length > 0){
+			//sort the array by likes to views ratio
+			AITweets.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
+		return res.json({ status: 'ok', tweets: AITweets })
+		}
+		else{
+			return res.json({ status: 'error', error: 'No Tweets found for user' })
+		}
+
+	}
+
+	if(tweeterUserHadleToPullTweets === "null"){
+
+		const AITweets = await TweetData.find({
+
+			//case insensitive search on handle
+			tag: { '$regex':topicToPullTweets , '$options' : 'i'} ,
+			curationstatus:"notcurated"
+		})
+
+		if(AITweets.length > 0){
+			//sort the array by likes to views ratio
+			AITweets.sort((a, b) => (a.likesTOviewsRatio > b.likesTOviewsRatio) ? -1 : 1)
+
+		return res.json({ status: 'ok', tweets: AITweets })
+		}
+		else{
+			return res.json({ status: 'error', error: 'No Tweets found for topic' })
+		}
+	}	
+	
 })
 // CURATE TWEET END
 
@@ -187,6 +248,7 @@ app.post('/api/GenerateAITweet', async (req, res) => {
 
 	let neednewAITweetforthisTweet = req.body.neednewAITweetforthisTweet.trim();
 	let dbid = req.body.dbid.trim();
+	let promptforAI = `${neednewAITweetforthisTweet}${neednewAITweetforthisTweet.slice(-1)==="." ? "" : "."}` //add . if not present
 	
 	const { Configuration, OpenAIApi } = require("openai");
 
@@ -194,7 +256,7 @@ app.post('/api/GenerateAITweet', async (req, res) => {
 		apiKey: process.env.apiKey,
 	});
 	const openai = new OpenAIApi(configuration);
-	let promptfornewtweet = `Write a new Tweet with no hashtags using the following Tweet as context. ${neednewAITweetforthisTweet}`;
+	let promptfornewtweet = `Write a new Tweet with no hashtags using the following Tweet as context. ${promptforAI}`;
 
 
 	try{
@@ -651,3 +713,4 @@ app.post('/api/examples', async (req, res) => {
 app.listen(PORT, () => {
 	console.log(`Server started on ${PORT}`)
 })
+

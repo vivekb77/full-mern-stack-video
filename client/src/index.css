@@ -76,6 +76,9 @@ code {
   font-weight: 700;
   width: 80%;
 }
+
+
+
 .mainsubtitleads{
   font-size: 0.7em;
   text-align: center;
@@ -319,6 +322,7 @@ hr {
 
 .copybutton {
   text-align: center;
+  font-size: 14px;
   text-transform: uppercase;
   cursor: pointer;
   font-size: 13px;
@@ -397,7 +401,13 @@ a:active {
   text-decoration: none;
 }
 
-
+.mainsubtitlelink{
+  font-size: 1.2em;
+  text-align: center;
+  color: #fa1534;
+  font-weight: 700;
+  width: 80%;
+}
 
 @media screen and (max-width: 600px) {
 
@@ -438,7 +448,7 @@ a:active {
     font-size: 1.2em;
   }
 
-  .mainsubtitle{
+  .mainsubtitle .mainsubtitlelink{
     font-size: 1.0em;
   }
   .title {
