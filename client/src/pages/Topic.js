@@ -8,8 +8,8 @@ import { Helmet } from 'react-helmet';
 require('dotenv').config();
 
 ReactGA.event({
-	category: 'AI Tweets',
-	action: 'AI Tweets Page Viewed'
+	category: 'Topic',
+	action: 'Topic Page Viewed'
   });
 
 const baseURL = process.env.REACT_APP_BASE_URL
@@ -92,7 +92,7 @@ const Topic = () => {
 				topictopulltweets: twitterUserID,
 			}),
 
-		})
+		}) 
 
 		const data = await req.json()
 		if (data.status === 'ok') {
@@ -124,17 +124,13 @@ const Topic = () => {
 				setDisable(false);	
 				
               }
-			  ReactGA.event({
-				category: 'AI Tweets',
-				action: 'An AI Tweet Generated'
-			  });
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
 			setErrormessage(userName => data.error);
 			
 			ReactGA.exception({
-				description: 'An error ocurred on AI Tweets page',
+				description: 'An error ocurred on Topic page',
 				fatal: true
 			  });
 		}
@@ -153,13 +149,13 @@ const Topic = () => {
 			<h3 className='mainsubtitle'>Looking at great content inspires you to write better content, faster.</h3>
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2 className='mainsubtitle'><a className='mainsubtitlelink' href="/">Search Twitter Users here</a></h2>
-			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
+			 <h2 className='mainsubtitle'><a className='mainsubtitlelink' href="/handle">Search Twitter Users here</a></h2>
+			 {!disable1 && <h6>Pulling Twitter topics...Please wait..</h6>}
 
 			<div className='admincardmain'>
 			 {admin.map((admin,index,) => {
 				return <AdminCard 
-				admin={admin}  key={index} chooseHandle={chooseHandle}
+				admin={admin}  key={index} chooseHandle={chooseHandle} handleortag={"tag"}
 				// onChange={setAdmin}
 				/>
 			})}
@@ -176,13 +172,13 @@ const Topic = () => {
 					onChange={(e) => settwitterUserID(e.target.value)}
 				/> */}
 
-				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Analysis` } disabled={!twitterUserID}/>
+				<input type="submit" className='button' value={disable ? `Analysing...` : `Get Tweets` } disabled={!twitterUserID}/>
 				
 			</form>
 			{disable && <h6>Analysis and new Tweet genaration may take few seconds..Please wait..</h6>}
 			<br/>
-			{disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>}
-			<br/>
+			{/* {disable && <h5><a href="mailto:learn@dictionaryv2.com">Send us feedback at learn@dictionaryv2.com</a></h5>} */}
+			{/* <br/> */}
 
 			{handle && <h4 className="mainsubtitle">{`#${handle}`}</h4>}
 			

@@ -111,6 +111,9 @@ export default function Card(props) {
                {props.tweet && <button className="copybutton" onClick={() => AddTag(props.tweet.dbid)} disabled={!tag}>Add Tag</button>}
                <br/>
                <br/>
+                <h4 className="">{`business networking startups success strategy tech marketing jobs sales innovation science history philosophy psychology software productivity life advertising tips content blog women work design`}</h4>
+               <br/>
+               <br/>
                {props.tweet &&<a className="Tweetlink" href={`${props.tweet.tweetID}`} target="_blank" rel="noreferrer">View this Tweet by {`${props.tweet.TwitteruserFullName} on Twitter`}</a>} 
 
             </div>}

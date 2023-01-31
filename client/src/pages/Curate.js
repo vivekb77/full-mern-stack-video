@@ -8,6 +8,10 @@ import AdminCard from './AdminCard'
 import TopicCard from './TopicCard'
 require('dotenv').config();
 
+ReactGA.event({
+	category: 'Curate',
+	action: 'Curate page viewed'
+  });
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
@@ -133,16 +137,13 @@ const Curate = () => {
 
 				
               }
-			  ReactGA.event({
-				category: 'Curate',
-				action: 'Curate page used'
-			  });
+			 
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
 			setErrormessage(userName => data.error);
 			ReactGA.exception({
-				description: 'An error ocurred on Tweets page',
+				description: 'An error ocurred on Curate page',
 				fatal: true
 			  });
 		}
@@ -232,7 +233,7 @@ const Curate = () => {
 			{/* <h2 className='mainsubtitle'>Analyse user's last few Tweets, and write new Tweets in the same style</h2> */}
 			 {errormessage && <h4 className="errormessage">{`${errormessage}`}</h4>}
 
-			 <h2 className='mainsubtitle'><a href="/tweets">Pull Tweets here</a></h2>
+			 <h2 className='mainsubtitle'><a href="/pulltweets">Pull Tweets here</a></h2>
 			 
 			 {!disable1 && <h6>Pulling Twitter users...Please wait..</h6>}
 			{tokens && <h6>Total Tokens used - {tokens}</h6>}
@@ -240,7 +241,7 @@ const Curate = () => {
 			 <div className='admincardmain'>
 			 {admin.map((admin,index,) => {
 				return <AdminCard 
-				admin={admin}  key={index} chooseHandle={chooseHandle}
+				admin={admin}  key={index} chooseHandle={chooseHandle} handleortag={"handle"}
 				// onChange={setAdmin}
 				/>
 			})}

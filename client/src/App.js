@@ -23,9 +23,9 @@ const App = () => {
 			<BrowserRouter>
 				{/* <Route path="/login" exact component={Login} /> */}
 				{/* <Route path="/register" exact component={Register} /> */}
-				<Route path="/tweets" exact component={Tweets} />
-				<Route path="/" exact component={AITweets} />
-				<Route path="/topic" exact component={Topic} />
+				<Route path="/pulltweets" exact component={Tweets} />
+				<Route path="/handle" exact component={AITweets} />
+				<Route path="/" exact component={Topic} />
 				<Route path="/curate" exact component={Curate} />
 
 				{/* <Route path="/admin" exact component={Admin} /> */}

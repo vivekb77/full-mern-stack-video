@@ -6,6 +6,10 @@ import ReactGA from 'react-ga';
 import { Helmet } from 'react-helmet';
 require('dotenv').config();
 
+ReactGA.event({
+	category: 'Pull Tweets',
+	action: 'Pull Tweets page viewes'
+  });
 
 const baseURL = process.env.REACT_APP_BASE_URL
 
@@ -101,16 +105,13 @@ const Tweets = () => {
 				setDisable(false);	
 				
               }
-			  ReactGA.event({
-				category: 'Pull Tweets',
-				action: 'Tweets were pulled'
-			  });
+			 
 		} 
 		else if(data.status === 'error'){
 			setDisable(false);
 			setErrormessage(userName => data.error);
 			ReactGA.exception({
-				description: 'An error ocurred on Tweets page',
+				description: 'An error ocurred on Pull Tweets page',
 				fatal: true
 			  });
 		}

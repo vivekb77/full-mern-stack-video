@@ -18,7 +18,9 @@ export default function AdminCard(props) {
 
         <div id={props.admin} className={!disable ? 'admincard' : 'admincardselected'} onClick={() => {SelectDiv(props.admin)}} >
        
-              {props.admin && <p className="card-text"><span style={{color: `#808080`}}>  </span>@{props.admin}</p>}
+              {props.admin && props.handleortag == "handle" && <p className="card-text"><span style={{color: `#808080`}}>  </span>@{props.admin}</p>}
+              {props.admin && props.handleortag == "tag" &&  <p className="card-text"><span style={{color: `#808080`}}>  </span>#{props.admin}</p>}
+
         </div>
     );
 }
